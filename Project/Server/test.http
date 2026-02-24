@@ -1,0 +1,28 @@
+http://localhost:30000/api/v1/getKv?class=PROVA&key=lancia,fiat
+
+###
+
+POST http://localhost:30000/api/v1/addKv
+Content-Type: application/json
+
+{
+  "class": "PROVA",
+  "key": ["lancia", "fiat"],
+  "value": "fedra"
+}
+
+###
+
+http://localhost:30000/api/v1/delKv?class=PROVA&key=lancia,fiat
+
+###
+http://localhost:30000/api/v1/getHistoryKv?class=PROVA&key=lancia,fiat
+
+###
+http://localhost:30000/api/v1/getClasses
+
+
+###
+http://localhost:30000/api/v1/getNumKv?class=PROVA&key=lancia,fiat
+
+

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanza di Voto - E-vote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Variabili e base (stesse delle dashboard) */
+        :root { --tv-green: #006747; --white: #ffffff; --black: #1a1a1a; --gray-light: #f4f6f8; --gray-text: #666666; --shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        body { background-color: var(--gray-light); color: var(--black); display: flex; height: 100vh; }
+        
+        /* Layout semplificato per il focus sul voto */
+        main { flex: 1; padding: 40px; max-width: 900px; margin: 0 auto; overflow-y: auto; }
+        
+        .header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .back-btn { text-decoration: none; color: var(--tv-green); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        
+        .voting-card { background: var(--white); padding: 40px; border-radius: 12px; box-shadow: var(--shadow); border-top: 6px solid var(--tv-green); }
+        .voting-card h1 { font-size: 28px; margin-bottom: 10px; }
+        .meta-info { color: var(--gray-text); font-size: 14px; margin-bottom: 30px; display: flex; gap: 20px; }
+        
+        .doc-box { background: var(--gray-light); padding: 15px; border-radius: 8px; margin-bottom: 30px; border: 1px dashed #ccc; display: flex; justify-content: space-between; align-items: center;}
+        
+        /* Opzioni di voto */
+        .vote-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .vote-btn { 
+            padding: 20px; border: 2px solid #e0e0e0; border-radius: 8px; background: white; 
+            font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center;
+        }
+        .vote-btn:hover { border-color: var(--tv-green); background: #f0f9f5; }
+        .vote-btn.selected { border-color: var(--tv-green); background: var(--tv-green); color: white; }
+        
+        .submit-btn { width: 100%; padding: 15px; background: var(--tv-green); color: white; border: none; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .submit-btn:hover { background: #004d35; }
+        .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="header-nav">
+            <a href="member_dashboard.html" class="back-btn">← Torna alla Dashboard</a>
+            <div style="font-family: monospace; font-size: 12px; color: var(--gray-text);">Wallet Sincronizzato: 0x71C...6F</div>
+        </div>
+
+        <div class="voting-card">
+            <h1>Piano Investimenti Q1 2026</h1>
+            <div class="meta-info">
+                <span>Scadenza: 12 Gen 2026, 18:00</span>
+                <span>Quorum Richiesto: 50% + 1</span>
+                <span>Smart Contract: #0x8f23...</span>
+            </div>
+
+            <div class="doc-box">
+                <div>
+                    <strong>Documentazione Allegata (IPFS)</strong><br>
+                    <span style="font-size: 13px; color: var(--gray-text);">Piano_Investimenti_Draft_v2.pdf (2.4 MB)</span>
+                </div>
+                <button style="padding: 8px 15px; cursor: pointer; border: 1px solid #ccc; border-radius: 4px;">Scarica / Leggi</button>
+            </div>
+
+            <h3 style="margin-bottom: 15px;">Esprimi la tua preferenza:</h3>
+            <div class="vote-options">
+                <button class="vote-btn" onclick="selectVote(this, 'favorevole')">Favorevole</button>
+                <button class="vote-btn" onclick="selectVote(this, 'contrario')">Contrario</button>
+                <button class="vote-btn" onclick="selectVote(this, 'astenuto')">Astenuto</button>
+            </div>
+
+            <button class="submit-btn" id="confirmBtn" disabled onclick="submitVote()">Firma Transazione e Vota</button>
+        </div>
+    </main>
+
+    <script>
+        let currentVote = null;
+        function selectVote(element, voteType) {
+            document.querySelectorAll('.vote-btn').forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+            currentVote = voteType;
+            document.getElementById('confirmBtn').disabled = false;
+        }
+
+        function submitVote() {
+            const btn = document.getElementById('confirmBtn');
+            btn.innerText = "Interazione con Metamask in corso...";
+            setTimeout(() => {
+                alert(`Voto "${currentVote}" registrato con successo sulla Blockchain di Tor Vergata! Hash TX: 0x9a4b...`);
+                window.location.href = 'member_dashboard.html';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
