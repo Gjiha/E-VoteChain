@@ -1,28 +1,40 @@
-http://localhost:30000/api/v1/getKv?class=PROVA&key=lancia,fiat
-
-###
+###ADD KEY
 
 POST http://localhost:30000/api/v1/addKv
 Content-Type: application/json
 
 {
-  "class": "PROVA",
-  "key": ["lancia", "fiat"],
-  "value": "fedra"
+  "class": "Reunion",
+  "key": "0x",
+  "value": {
+    "partecipanti" :["idw1", "idw2", "idw3"],
+    "dataInizio" :"data",
+    "dataFine":"",
+    "verbale":""
+  }
 }
 
-###
 
-http://localhost:30000/api/v1/delKv?class=PROVA&key=lancia,fiat
+###GET KEY
 
-###
+http://localhost:30000/api/v1/getKv?class=Reunion&key=0x
+
+
+
+###DELETE KEY
+
+http://localhost:30000/api/v1/delKv?class=Reunion&key=0x
+
+###GET HISTORY KEY
 http://localhost:30000/api/v1/getHistoryKv?class=PROVA&key=lancia,fiat
 
-###
+###GET CLASSES
 http://localhost:30000/api/v1/getClasses
 
 
-###
+###GET NUM KEY
 http://localhost:30000/api/v1/getNumKv?class=PROVA&key=lancia,fiat
 
+###GET KEYS COPY
+http://localhost:30000/api/v1/getKeysCopy?class=Reunion
 

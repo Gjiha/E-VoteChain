@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - E-vote System</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="login.css">
-    <script defer src="login.js"></script>
-
+    <link rel="stylesheet" href="Sources/login.css">
+    <script defer src="Sources/login.js"></script>
 </head>
 
 <body>
@@ -26,8 +25,8 @@
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label for="walletId">ID Utente (Wallet Address)</label>
-                <input type="text" id="walletId" placeholder="Es: 0xAdmin... o 0xMember..." required>
+                <label for="walletId">ID Utente (E-mail Address)</label>
+                <input type="text" id="walletId" placeholder="Es: nome.cognome@ruolo..." required>
             </div>
 
             <div class="form-group">

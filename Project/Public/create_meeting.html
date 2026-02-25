@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crea Riunione - E-vote CEO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/create_meeting.css">
+    <script defer src="Sources/create_meeting.js"></script>
+</head>
+
+<body>
+    <main>
+        <div class="header-nav">
+            <a href="ceo_dashboard.html" class="back-btn">← Torna alla Dashboard</a>
+        </div>
+
+        <div class="form-card">
+            <h1>Configura Nuova Riunione</h1>
+
+            <form id="meetingForm">
+
+                <div class="form-group">
+                    <label>Titolo Assemblea</label>
+                    <input type="text" id="titolo" required>
+                </div>
+
+                <div class="form-group" style="display: flex; gap: 20px;">
+                    <div style="flex: 1;">
+                        <label>Data e Ora Inizio</label>
+                        <input type="datetime-local" id="dataInizio" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Data e Ora Fine</label>
+                        <input type="datetime-local" id="dataFine" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Partecipanti (separati da virgola)</label>
+                    <input type="text" id="partecipanti" placeholder="idw1,idw2,idw3" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Carica Verbale (PDF)</label>
+                    <input type="file" id="verbaleFile" accept="application/pdf" required>
+                </div>
+
+                <button type="submit" class="btn-submit" id="deployBtn">
+                    Crea Riunione
+                </button>
+
+                <div class="status-message" id="status"></div>
+
+            </form>
+        </div>
+    </main>
+</body>
+
+</html>

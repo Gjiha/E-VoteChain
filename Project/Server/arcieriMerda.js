@@ -1,3 +1,4 @@
+//Questa funzione data una classe e una chiave ti tira fuori il value che può essere un qualunque JSON
 async function getKV(cls, key) {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -25,6 +26,7 @@ async function getKV(cls, key) {
 	}
 }
 
+//Aggiungi una coppia classe chiave con associato un qualsivoglia valore
 async function addKV(cls, key, value) {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -53,6 +55,7 @@ async function addKV(cls, key, value) {
 	}
 }
 
+//Elimina una coppia chiave valore
 async function delKV(cls, key) {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -80,6 +83,7 @@ async function delKV(cls, key) {
 	}
 }
 
+//Ritorna lo storico delle operazioni effettuate sulla coppia chiave-valore
 async function getHistoryKV(cls, key) {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -107,6 +111,7 @@ async function getHistoryKV(cls, key) {
 	}
 }
 
+//Ritorna il numero di chiavi chiamate in quel modo associate alla classe
 async function getNumKV(cls, key) {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -134,6 +139,7 @@ async function getNumKV(cls, key) {
 	}
 }
 
+//Ritorna tutte le classi nel sistema
 async function getClasses() {
 	try {
 		const response = await fetch("http://localhost:9999/api", {
@@ -159,6 +165,34 @@ async function getClasses() {
 	}
 }
 
+//Ritorna tutte le chiavi associate alla classe messa in input
+async function getKeysCopy(cls) {
+	try {
+		const response = await fetch("http://localhost:9999/api", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				cmd: "GetKeys",
+				class: cls,
+				key: "",
+			}),
+		});
+
+		if (!response.ok) {
+			throw new Error("Fetch non andata a buon fine");
+		}
+
+		const json = await response.json();
+
+		return json.answer; // <-- struttura corretta
+	} catch (err) {
+		console.error(err);
+		throw err;
+	}
+}
+
 // 👇 ESPORTAZIONE
 module.exports = {
 	getKV,
@@ -167,4 +201,5 @@ module.exports = {
 	getHistoryKV,
 	getClasses,
 	getNumKV,
+	getKeysCopy,
 };
