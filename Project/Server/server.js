@@ -2,9 +2,9 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-const pool = require("./database");
-const mappingRoutes = require("./route_mapping");
-const fileRoutes = require("./route_files");
+const dbRoutes = require("./routes/route_login.js");
+const mappingRoutes = require("./routes/route_mapping");
+const fileRoutes = require("./routes/route_files.js");
 
 const app = express();
 
@@ -12,8 +12,9 @@ app.use(cors());
 app.use(express.json()); // per leggere json
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(mappingRoutes);
-app.use(fileRoutes);
+app.use("/api/v1/", mappingRoutes);
+app.use("/api/v1/", fileRoutes);
+app.use("/api/v1/", dbRoutes);
 
 const PORT = 30000;
 app.listen(PORT, () => {

@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const mapping = require("./mapping");
+const mapping = require("../mapping/mapping");
 
-router.get("/api/v1/getKv", async (req, res) => {
+router.get("/getKv", async (req, res) => {
 	try {
 		const cls = req.query.class;
 		const key = req.query.key?.split(",");
@@ -26,7 +26,7 @@ router.get("/api/v1/getKv", async (req, res) => {
 	}
 });
 
-router.post("/api/v1/addKv", async (req, res) => {
+router.post("/addKv", async (req, res) => {
 	try {
 		const cls = req.body.class;
 		const key = req.body.key;
@@ -50,7 +50,7 @@ router.post("/api/v1/addKv", async (req, res) => {
 	}
 });
 
-router.get("/api/v1/delKv", async (req, res) => {
+router.get("/delKv", async (req, res) => {
 	try {
 		const cls = req.query.class;
 		const key = req.query.key?.split(",");
@@ -74,7 +74,7 @@ router.get("/api/v1/delKv", async (req, res) => {
 	}
 });
 
-router.get("/api/v1/getHistoryKv", async (req, res) => {
+router.get("/getHistoryKv", async (req, res) => {
 	try {
 		const cls = req.query.class;
 		const key = req.query.key?.split(",");
@@ -98,7 +98,7 @@ router.get("/api/v1/getHistoryKv", async (req, res) => {
 	}
 });
 
-router.get("/api/v1/getClasses", async (req, res) => {
+router.get("/getClasses", async (req, res) => {
 	try {
 		const cls = req.query.class;
 
@@ -115,7 +115,7 @@ router.get("/api/v1/getClasses", async (req, res) => {
 	}
 });
 
-router.get("/api/v1/getNumKv", async (req, res) => {
+router.get("/getNumKv", async (req, res) => {
 	try {
 		const cls = req.query.class;
 		const key = req.query.key?.split(",");
@@ -139,7 +139,7 @@ router.get("/api/v1/getNumKv", async (req, res) => {
 	}
 });
 
-router.get("/api/v1/getKeysCopy", async (req, res) => {
+router.get("/getKeysCopy", async (req, res) => {
 	try {
 		const cls = req.query.class;
 

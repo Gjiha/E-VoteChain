@@ -38,3 +38,13 @@ http://localhost:30000/api/v1/getNumKv?class=PROVA&key=lancia,fiat
 ###GET KEYS COPY
 http://localhost:30000/api/v1/getKeysCopy?class=Reunion
 
+###Prova database
+POST http://localhost:30000/api/v1/loginCheck
+Content-Type: application/json
+
+{
+  "id_wallet": "1",
+  "psw": "P@ssLuca85" 
+}
+
+

@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
 
 const storage = multer.diskStorage({
 	destination: function (req, file, cb) {
@@ -14,7 +13,8 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-router.post("/api/v1/uploadVerbale", upload.single("verbale"), (req, res) => {
+router.post("/uploadVerbale", upload.single("verbale"), (req, res) => {
+	console.log("richiesta upload file");
 	try {
 		if (!req.file) {
 			return res.status(400).json({ message: "File mancante" });

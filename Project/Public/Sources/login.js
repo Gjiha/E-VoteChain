@@ -1,42 +1,63 @@
-function handleLogin(e) {
+async function handleLogin(e) {
 	e.preventDefault();
 
-	//QUI BISOGNA RICHIAMARE LE API DI ARCIERI
-
-	const walletInput = document.getElementById("walletId").value.toLowerCase();
-	const btn = document.getElementById("submitBtn");
+	const walletInput = document.getElementById("walletId");
+	const passwordInput = document.getElementById("password");
 	const btnText = document.getElementById("btnText");
 	const msg = document.getElementById("login-message");
 
-	// Reset UI
-	msg.classList.remove("error-msg");
-	btn.disabled = true;
-	btnText.innerText = "Verifica Blockchain in corso...";
+	const walletValue = walletInput.value.trim();
+	const pswValue = passwordInput.value;
 
-	// Simulazione Log
-	msg.innerText = "> Hashing SHA-256...";
+	// Feedback visivo: disabilita pulsante o cambia testo
+	btnText.innerText = "Verifica in corso...";
+	msg.innerText = ""; // Pulisce messaggi precedenti
 
-	setTimeout(() => {
-		msg.innerText = "> Verifica Smart Contract...";
-	}, 1000);
+	try {
+		const response = await fetch(
+			"http://localhost:30000/api/v1/loginCheck",
+			{
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					id_wallet: walletValue,
+					psw: pswValue,
+				}),
+			},
+		);
 
-	setTimeout(() => {
-		// LOGICA DI REINDIRIZZAMENTO
-		if (walletInput.includes("admin")) {
-			msg.innerText = "> Ruolo identificato: CEO/ADMIN";
-			window.location.href = "ceo_dashboard.html"; // Assicurati di salvare la pagina CEO con questo nome
-		} else if (
-			walletInput.includes("member") ||
-			walletInput.includes("socio")
-		) {
-			msg.innerText = "> Ruolo identificato: SOCIO/MEMBRO";
-			window.location.href = "member_dashboard.html"; // Link alla nuova pagina membro
+		const result = await response.json();
+
+		if (response.ok) {
+			// LOGIN SUCCESSO
+			msg.style.color = "green";
+			msg.innerText = "Login effettuato! Reindirizzamento...";
+
+			// Salviamo i dati dell'utente (opzionale) nel localStorage
+			localStorage.setItem("user", JSON.stringify(result.data));
+
+			// Esempio: reindirizza dopo 1 secondo
+			const ruolo = result.data.classe.toLowerCase();
+
+			setTimeout(() => {
+				if (ruolo === "ceo") {
+					window.location.href = "ceo_dashboard.html";
+				} else {
+					window.location.href = "member_dashboard.html";
+				}
+			}, 1000);
 		} else {
-			msg.innerText =
-				"> Errore: Credenziali non riconosciute nel Ledger.";
-			msg.classList.add("error-msg");
-			btn.disabled = false;
-			btnText.innerText = "Accedi";
+			// LOGIN FALLITO (401, 404, ecc.)
+			const bodyErrore = await response.text();
+			console.log("RISPOSTA DEL SERVER (HTML):", bodyErrore);
 		}
-	}, 2500);
+	} catch (error) {
+		console.error("Errore fetch:", error);
+		msg.style.color = "red";
+		msg.innerText = "Impossibile collegarsi al server.";
+	} finally {
+		btnText.innerText = "Login";
+	}
 }
