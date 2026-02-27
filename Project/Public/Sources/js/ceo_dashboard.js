@@ -151,6 +151,23 @@ async function fetchMeetingHistory() {
 	}
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+	// 1. Recupera la stringa dal localStorage
+	const userString = localStorage.getItem("user");
+
+	if (userString) {
+		// 2. Trasforma la stringa in un oggetto JavaScript
+		const user = JSON.parse(userString);
+
+		// 3. Accedi alla proprietà e inseriscila nell'HTML
+		document.getElementById("userName").innerText =
+			`${user.nome} ${user.cognome}`;
+		document.getElementById("userInitials").innerText = (
+			user.nome[0] + user.cognome[0]
+		).toUpperCase();
+	}
+});
+
 function formatItalianDate(dateObject) {
 	if (isNaN(dateObject.getTime())) return "Data non valida";
 

@@ -1,0 +1,67 @@
+/* Stili specifici per la pagina impostazioni */
+.settings-container {
+	background-color: var(--white);
+	padding: 40px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	max-width: 800px;
+}
+
+.settings-group {
+	margin-bottom: 25px;
+	border-bottom: 1px solid var(--gray-light);
+	padding-bottom: 20px;
+}
+
+.settings-group:last-child {
+	border: none;
+}
+
+.settings-group h3 {
+	margin-bottom: 15px;
+	color: var(--tv-green);
+	font-size: 18px;
+}
+
+.info-row {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	gap: 20px;
+	margin-bottom: 10px;
+	align-items: center;
+}
+
+.info-label {
+	font-weight: 700;
+	color: var(--gray-text);
+	font-size: 14px;
+}
+
+.info-value {
+	padding: 10px;
+	background-color: var(--gray-light);
+	border-radius: 6px;
+	color: var(--black);
+	font-family: monospace;
+	border: 1px solid #e0e0e0;
+}
+
+.badge-role {
+	background-color: var(--tv-green);
+	color: white;
+	padding: 4px 10px;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.btn-back {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	color: var(--tv-green);
+	text-decoration: none;
+	margin-bottom: 20px;
+	font-weight: 500;
+}

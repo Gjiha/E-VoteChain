@@ -55,6 +55,7 @@ async function handleLogin(e) {
 		}
 	} catch (error) {
 		console.error("Errore fetch:", error);
+		console.log(error);
 		msg.style.color = "red";
 		msg.innerText = "Impossibile collegarsi al server.";
 	} finally {

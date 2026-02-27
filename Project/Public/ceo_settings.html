@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impostazioni Profilo - E-vote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/css/ceo_dashboard.css">
+    <link rel="stylesheet" href="Sources/css/ceo_settings.css">
+    <script defer src="Sources/js/ceo_settings.js"></script>
+</head>
+
+<body>
+
+    <aside>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            UniTorV E-Vote
+        </div>
+        <div class="history-title">Menu</div>
+        <ul class="history-list">
+            <li class="history-item" onclick="window.location.href='ceo_dashboard.html'">Torna alla Dashboard</li>
+            <li class="history-item" onclick="handleLogout()">Logout</li>
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <a href="ceo_dashboard.html" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Torna Indietro
+            </a>
+            <div class="user-profile">
+                <span id="userNameHeader">Caricamento...</span>
+                <div class="avatar" id="userInitials">--</div>
+            </div>
+        </header>
+
+        <h1>Impostazioni <span>Account</span></h1>
+        <p style="margin-bottom: 30px; color: var(--gray-text);">Visualizza i dettagli del tuo profilo certificato nel
+            sistema Tor Vergata E-Vote.</p>
+
+        <div class="settings-container">
+            <div class="settings-group">
+                <h3>Informazioni Personali</h3>
+                <div class="info-row">
+                    <div class="info-label">Nome Completo:</div>
+                    <div class="info-value" id="displayNome">Nome Cognome (Statico)</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Email:</div>
+                    <div class="info-value" id="displayEmail">email.static@example.com</div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <h3>Sicurezza & Ruolo</h3>
+                <div class="info-row">
+                    <div class="info-label">ID Wallet (Public Key):</div>
+                    <div class="info-value" id="displayWallet">0x00000000000000000</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Livello Accesso:</div>
+                    <div><span class="badge-role" id="displayClasse">RUOLO</span></div>
+                </div>
+            </div>
+
+            <button class="btn" style="background-color: #d9534f;" onclick="handleLogout()">Scollega Account</button>
+        </div>
+    </main>
+
+
+</body>
+
+</html>
