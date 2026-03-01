@@ -123,3 +123,25 @@ document.addEventListener("DOMContentLoaded", function () {
 		console.error("Errore: Form 'meetingForm' non trovato nella pagina!");
 	}
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+	const userString = localStorage.getItem("user");
+
+	if (userString) {
+		const user = JSON.parse(userString);
+
+		// Popolamento Header
+		document.getElementById("userNameHeader").innerText =
+			user.nome + " " + user.cognome;
+		document.getElementById("userInitials").innerText = (
+			user.nome[0] + user.cognome[0]
+		).toUpperCase();
+	} else {
+		window.location.href = "login.html";
+	}
+});
+
+function handleLogout() {
+	localStorage.clear();
+	window.location.href = "login.html";
+}

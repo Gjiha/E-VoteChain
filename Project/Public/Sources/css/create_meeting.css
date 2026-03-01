@@ -1,7 +1,5 @@
-/* --- STILI SPECIFICI PER IL FORM --- */
-
 main {
-	max-width: 900px; /* Un po' più largo per i form */
+	max-width: auto; /* Un po' più largo per i form */
 	margin: 0; /* Rimuoviamo il margin auto perché c'è la sidebar */
 }
 
@@ -15,6 +13,7 @@ main {
 }
 
 .form-card {
+	max-width: 900px;
 	background: var(--white);
 	padding: 35px;
 	border-radius: 12px;
@@ -50,7 +49,7 @@ main {
 	display: block;
 	font-size: 13px;
 	font-weight: 700;
-	margin-bottom: 8px;
+	margin: 8px;
 	color: var(--gray-text);
 }
 
@@ -106,4 +105,150 @@ textarea:focus {
 	border-radius: 6px;
 	text-align: center;
 	display: none; /* Mostrato via JS */
+}
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	.form-card {
+		padding: 20px;
+	}
+	.form-row {
+		flex-direction: column;
+		gap: 0;
+	}
+	.form-row .form-group {
+		margin-bottom: 15px;
+	}
+	.btn-submit {
+		padding: 15px;
+		font-size: 15px;
+	}
+}
+/* --- STILI SPECIFICI PER IL FORM --- */
+
+main {
+	max-width: auto; /* Un po' più largo per i form */
+	margin: 0; /* Rimuoviamo il margin auto perché c'è la sidebar */
+}
+
+.back-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: var(--tv-green);
+	font-weight: 500;
+}
+
+.form-card {
+	max-width: 900px;
+	background: var(--white);
+	padding: 35px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	border-top: 5px solid var(--tv-green);
+}
+
+.form-section {
+	margin-bottom: 30px;
+	padding-bottom: 10px;
+}
+
+.form-section h3 {
+	font-size: 16px;
+	color: var(--tv-green);
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--gray-light);
+	padding-bottom: 10px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+
+.form-row {
+	display: flex;
+	gap: 20px;
+}
+
+.form-row .form-group {
+	flex: 1;
+}
+
+.form-group label {
+	display: block;
+	font-size: 13px;
+	font-weight: 700;
+	margin: 8px;
+	color: var(--gray-text);
+}
+
+input[type="text"],
+input[type="datetime-local"],
+textarea {
+	width: 100%;
+	padding: 12px;
+	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	font-size: 15px;
+	background-color: var(--gray-light);
+	transition: border-color 0.2s;
+}
+
+input:focus,
+textarea:focus {
+	border-color: var(--tv-green);
+	outline: none;
+	background-color: white;
+}
+
+.file-input-wrapper {
+	border: 2px dashed #e0e0e0;
+	padding: 20px;
+	border-radius: 6px;
+	background: #fafafa;
+	text-align: center;
+}
+
+.btn-submit {
+	background: var(--tv-green);
+	color: white;
+	padding: 18px;
+	border: none;
+	border-radius: 8px;
+	font-size: 16px;
+	font-weight: 700;
+	cursor: pointer;
+	width: 100%;
+	box-shadow: 0 4px 12px rgba(0, 103, 71, 0.2);
+	transition: all 0.2s;
+}
+
+.btn-submit:hover {
+	background: var(--tv-green-dark);
+	transform: translateY(-2px);
+}
+
+.status-message {
+	margin-top: 20px;
+	padding: 15px;
+	border-radius: 6px;
+	text-align: center;
+	display: none; /* Mostrato via JS */
+}
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	.form-card {
+		padding: 20px;
+	}
+	.form-row {
+		flex-direction: column;
+		gap: 0;
+	}
+	.form-row .form-group {
+		margin-bottom: 15px;
+	}
+	.btn-submit {
+		padding: 15px;
+		font-size: 15px;
+	}
 }

@@ -289,3 +289,47 @@ a:visited {
 .btn:hover {
 	background-color: var(--tv-green-dark);
 }
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	body {
+		flex-direction: column;
+		overflow: auto; /* Riabilita lo scroll generale */
+	}
+	aside {
+		width: 100%;
+		height: auto;
+		border-right: none;
+		border-bottom: 1px solid #e0e0e0;
+		padding: 15px;
+	}
+	.history-list {
+		display: flex;
+		gap: 10px;
+		overflow-x: auto;
+		white-space: nowrap;
+		padding-bottom: 10px;
+	}
+	.history-item {
+		flex: 0 0 auto;
+		border-bottom: none;
+		border-right: 1px solid #f0f0f0;
+	}
+	main {
+		padding: 20px;
+		overflow-y: visible;
+	}
+	header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+		margin-bottom: 25px;
+	}
+	h1 {
+		font-size: 24px;
+	}
+	.stats-row {
+		flex-direction: column;
+		gap: 15px;
+	}
+}

@@ -1,67 +1,116 @@
-/* Stili specifici per la pagina impostazioni */
+/* --- STILI SPECIFICI PER LE IMPOSTAZIONI --- */
+
+main {
+	max-width: auto;
+	margin: 0;
+}
+
+.btn-back {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: var(--tv-green);
+	font-weight: 500;
+}
+
 .settings-container {
-	background-color: var(--white);
-	padding: 40px;
+	max-width: 900px; /* Uniformato alla .form-card */
+	background: var(--white);
+	padding: 35px; /* Uniformato alla .form-card */
 	border-radius: 12px;
 	box-shadow: var(--shadow);
-	max-width: 800px;
+	border-top: 5px solid var(--tv-green); /* Aggiunta la barra superiore verde */
 }
 
 .settings-group {
-	margin-bottom: 25px;
-	border-bottom: 1px solid var(--gray-light);
-	padding-bottom: 20px;
-}
-
-.settings-group:last-child {
-	border: none;
+	margin-bottom: 30px; /* Uniformato alla .form-section */
+	padding-bottom: 10px;
 }
 
 .settings-group h3 {
-	margin-bottom: 15px;
+	font-size: 16px; /* Uniformato a .form-section h3 */
 	color: var(--tv-green);
-	font-size: 18px;
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--gray-light); /* Spostato il bordo qui, sotto il testo */
+	padding-bottom: 10px;
+	text-transform: uppercase;
+	letter-spacing: 1px;
 }
 
 .info-row {
-	display: grid;
-	grid-template-columns: 200px 1fr;
+	display: flex;
 	gap: 20px;
-	margin-bottom: 10px;
+	margin-bottom: 15px;
 	align-items: center;
 }
 
 .info-label {
+	flex: 0 0 200px;
+	font-size: 13px; /* Uniformato alle label dei form */
 	font-weight: 700;
 	color: var(--gray-text);
-	font-size: 14px;
 }
 
 .info-value {
-	padding: 10px;
-	background-color: var(--gray-light);
-	border-radius: 6px;
-	color: var(--black);
-	font-family: monospace;
+	flex: 1;
+	width: 100%;
+	padding: 12px; /* Uniformato agli input di testo */
 	border: 1px solid #e0e0e0;
+	border-radius: 6px;
+	font-size: 15px;
+	background-color: var(--gray-light);
+	color: var(--black);
+	font-family: monospace; /* Mantenuto per indirizzi wallet/email */
 }
 
 .badge-role {
 	background-color: var(--tv-green);
 	color: white;
-	padding: 4px 10px;
+	padding: 6px 12px;
 	border-radius: 20px;
-	font-size: 12px;
+	font-size: 13px;
 	font-weight: bold;
 	text-transform: uppercase;
+	display: inline-block;
 }
 
-.btn-back {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-	color: var(--tv-green);
-	text-decoration: none;
-	margin-bottom: 20px;
-	font-weight: 500;
+/* Stile per il bottone rosso di disconnessione uniformato al bottone verde */
+.btn {
+	padding: 18px;
+	border: none;
+	border-radius: 8px;
+	font-size: 16px;
+	font-weight: 700;
+	cursor: pointer;
+	width: 100%;
+	box-shadow: 0 4px 12px rgba(217, 83, 79, 0.2); /* Ombra rossa leggera */
+	transition: all 0.2s;
+	color: white;
+	margin-top: 15px;
+}
+
+.btn:hover {
+	transform: translateY(-2px);
+	filter: brightness(0.9); /* Scurisce leggermente al passaggio del mouse */
+}
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	.settings-container {
+		padding: 20px;
+	}
+	.info-row {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 8px;
+	}
+	.info-label {
+		flex: none;
+		width: 100%;
+	}
+	.btn {
+		padding: 15px;
+		font-size: 15px;
+	}
 }

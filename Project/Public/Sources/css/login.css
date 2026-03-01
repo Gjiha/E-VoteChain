@@ -148,3 +148,16 @@ input:focus {
 .error-msg {
 	color: var(--error-red) !important;
 }
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	body {
+		padding: 20px;
+	}
+	.login-card {
+		padding: 30px 20px;
+	}
+	h2 {
+		font-size: 22px;
+	}
+}

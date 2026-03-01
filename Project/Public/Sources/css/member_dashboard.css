@@ -208,3 +208,52 @@ h1 span {
 	word-break: break-all;
 	margin-top: 5px;
 }
+
+/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+@media (max-width: 768px) {
+	body {
+		flex-direction: column;
+		overflow: auto;
+	}
+	aside {
+		width: 100%;
+		height: auto;
+		border-right: none;
+		border-bottom: 1px solid #e0e0e0;
+	}
+	.history-list {
+		display: flex;
+		gap: 10px;
+		overflow-x: auto;
+		white-space: nowrap;
+		padding-bottom: 5px;
+	}
+	.history-item {
+		flex: 0 0 auto;
+		border-bottom: none;
+		border-right: 1px solid #f0f0f0;
+	}
+	main {
+		padding: 20px;
+		overflow-y: visible;
+	}
+	header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+		margin-bottom: 25px;
+	}
+	h1 {
+		font-size: 24px;
+	}
+	.grid-container {
+		grid-template-columns: 1fr; /* Passa a 1 singola colonna */
+	}
+	.action-buttons {
+		flex-direction: column;
+	}
+	.btn {
+		width: 100%;
+		text-align: center;
+	}
+}
