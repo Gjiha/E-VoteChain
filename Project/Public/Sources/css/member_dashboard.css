@@ -1,4 +1,8 @@
-/* --- VARIABILI COLORI (Palette Tor Vergata) --- */
+/* ==========================================================================
+   E-VOTE DASHBOARD STYLES (Palette Tor Vergata)
+   ========================================================================== */
+
+/* --- 1. VARIABILI E COLORI --- */
 :root {
 	--tv-green: #006747; /* Verde Tor Vergata Approssimativo */
 	--tv-green-dark: #004d35;
@@ -9,7 +13,7 @@
 	--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* --- RESET E BASE --- */
+/* --- 2. RESET E BASE --- */
 * {
 	margin: 0;
 	padding: 0;
@@ -22,18 +26,31 @@ body {
 	color: var(--black);
 	display: flex;
 	height: 100vh;
-	overflow: hidden; /* Evita doppio scroll */
+	overflow: hidden; /* Blocca lo scroll del body su Desktop */
 }
 
-/* --- SIDEBAR (Storico) --- */
-aside {
-	width: 280px;
-	background-color: var(--white);
-	border-right: 1px solid #e0e0e0;
+a:link,
+a:visited {
+	color: var(--black);
+	text-decoration: none;
+}
+
+/* --- 3. TYPOGRAPHY E HEADER --- */
+header {
 	display: flex;
-	flex-direction: column;
-	padding: 20px;
-	height: 100%;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 40px;
+}
+
+h1 {
+	font-size: 28px;
+	font-weight: 300;
+}
+
+h1 span {
+	font-weight: 700;
+	color: var(--tv-green);
 }
 
 .brand {
@@ -46,6 +63,24 @@ aside {
 	gap: 10px;
 }
 
+/* --- 4. LAYOUT PRINCIPALE --- */
+aside {
+	width: 280px;
+	background-color: var(--white);
+	border-right: 1px solid #e0e0e0;
+	display: flex;
+	flex-direction: column;
+	padding: 20px;
+	height: 100%;
+}
+
+main {
+	flex: 1;
+	padding: 40px;
+	overflow-y: auto; /* Consente lo scroll solo dentro al main */
+}
+
+/* --- 5. SIDEBAR: STORICO RIUNIONI --- */
 .history-title {
 	font-size: 14px;
 	text-transform: uppercase;
@@ -57,7 +92,8 @@ aside {
 
 .history-list {
 	list-style: none;
-	overflow-y: auto; /* Scroll se lo storico è lungo */
+	overflow-y: auto;
+	flex-grow: 1; /* Permette alla lista di riempire lo spazio residuo */
 }
 
 .history-item {
@@ -89,7 +125,6 @@ aside {
 	font-size: 10px;
 	padding: 2px 6px;
 	border-radius: 4px;
-	background-color: #eee;
 	color: #555;
 	margin-top: 5px;
 	display: inline-block;
@@ -103,30 +138,7 @@ aside {
 	color: #155724;
 }
 
-/* --- MAIN CONTENT (Central) --- */
-main {
-	flex: 1;
-	padding: 40px;
-	overflow-y: auto;
-}
-
-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 40px;
-}
-
-h1 {
-	font-size: 28px;
-	font-weight: 300;
-}
-
-h1 span {
-	font-weight: 700;
-	color: var(--tv-green);
-}
-
+/* --- 6. UTENTE --- */
 .user-profile {
 	display: flex;
 	align-items: center;
@@ -145,7 +157,7 @@ h1 span {
 	font-weight: bold;
 }
 
-/* --- GRID LAYOUT PER I PULSANTI E WIDGET --- */
+/* --- 7. GRID E CARDS --- */
 .dashboard-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -153,7 +165,6 @@ h1 span {
 	margin-bottom: 40px;
 }
 
-/* --- CARDS / PULSANTI --- */
 .card {
 	background-color: var(--white);
 	padding: 30px;
@@ -166,32 +177,13 @@ h1 span {
 	flex-direction: column;
 	justify-content: space-between;
 	height: 200px;
-	border-left: 5px solid transparent;
+	border-left: 5px solid var(--tv-green);
 	cursor: pointer;
 }
 
 .card:hover {
 	transform: translateY(-5px);
 	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-/* Stili specifici per le card */
-a:link,
-a:visited {
-	color: black;
-	text-decoration: none;
-}
-
-.card-action {
-	border-left-color: var(--tv-green);
-}
-
-.card-login {
-	border-left-color: var(--tv-green);
-}
-
-.card-settings {
-	border-left-color: var(--black);
 }
 
 .icon-large {
@@ -210,7 +202,7 @@ a:visited {
 	color: var(--gray-text);
 }
 
-/* --- LIVE STATUS SECTION (Feature Immaginata) --- */
+/* --- 8. LIVE SECTION & STATISTICHE --- */
 .live-section {
 	background-color: var(--white);
 	padding: 30px;
@@ -243,19 +235,6 @@ a:visited {
 	animation: pulse 2s infinite;
 }
 
-@keyframes pulse {
-	0% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.4;
-	}
-	100% {
-		opacity: 1;
-	}
-}
-
-/* Statistiche semplici */
 .stats-row {
 	display: flex;
 	gap: 40px;
@@ -274,7 +253,7 @@ a:visited {
 	color: var(--black);
 }
 
-/* Bottone primario */
+/* --- 9. BOTTONI --- */
 .btn {
 	background-color: var(--tv-green);
 	color: var(--white);
@@ -284,18 +263,111 @@ a:visited {
 	cursor: pointer;
 	font-weight: 500;
 	transition: background 0.2s;
+	display: inline-block;
+	text-align: center;
 }
 
 .btn:hover {
 	background-color: var(--tv-green-dark);
 }
 
-/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+/* ==========================================================================
+   --- 10. STILI BOX NOTIFICA RIUNIONE --- 
+   ========================================================================== */
+
+#activeMeetingPopup {
+	flex-direction: column;
+	border-left: 5px solid var(--tv-green);
+	/* max-width: 800px; Si allinea con la griglia superiore */
+}
+
+.popup-title-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--tv-green);
+	font-size: 20px;
+}
+
+.popup-description {
+	margin-bottom: 20px;
+	color: var(--gray-text);
+}
+
+.meeting-info-box {
+	background-color: var(--gray-light);
+	padding: 15px;
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	margin-bottom: 20px;
+}
+
+.meeting-info-box p {
+	margin-bottom: 8px;
+}
+
+.meeting-info-box p:last-child {
+	margin-bottom: 0;
+}
+
+.popup-actions {
+	display: flex;
+	gap: 15px;
+}
+
+/* Sovrascriviamo lo stile del bottone primario per farlo nero */
+.btn-primary {
+	background-color: var(--black);
+	color: var(--white);
+}
+
+.btn-primary:hover {
+	background-color: #333333;
+}
+
+/* Stile per il bottone secondario "Più tardi" */
+.btn-outline {
+	background-color: transparent;
+	color: var(--black);
+	border: 1px solid #ccc;
+}
+
+.btn-outline:hover {
+	background-color: #f0f0f0;
+}
+
+/* --- 11. ANIMAZIONI --- */
+@keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+/* ==========================================================================
+   --- 12. RESPONSIVE DESIGN (Desktop-First) --- 
+   ========================================================================== */
+
+/* Tablet & Mobile (Sotto i 992px) */
+@media (max-width: 992px) {
+	.dashboard-grid {
+		grid-template-columns: repeat(2, 1fr); /* Forza 2 colonne sui tablet */
+	}
+}
+
+/* Mobile (Sotto i 768px) */
 @media (max-width: 768px) {
 	body {
 		flex-direction: column;
-		overflow: auto; /* Riabilita lo scroll generale */
+		overflow-y: auto; /* Riattiva lo scroll sulla pagina intera */
 	}
+
+	/* La sidebar diventa un header orizzontale */
 	aside {
 		width: 100%;
 		height: auto;
@@ -303,6 +375,12 @@ a:visited {
 		border-bottom: 1px solid #e0e0e0;
 		padding: 15px;
 	}
+
+	.brand {
+		margin-bottom: 15px;
+	}
+
+	/* Lo storico diventa uno slider orizzontale su mobile */
 	.history-list {
 		display: flex;
 		gap: 10px;
@@ -310,26 +388,46 @@ a:visited {
 		white-space: nowrap;
 		padding-bottom: 10px;
 	}
+
 	.history-item {
 		flex: 0 0 auto;
 		border-bottom: none;
 		border-right: 1px solid #f0f0f0;
+		min-width: 200px; /* Larghezza minima per ogni elemento dello slider */
 	}
+
 	main {
 		padding: 20px;
 		overflow-y: visible;
 	}
+
 	header {
 		flex-direction: column;
 		align-items: flex-start;
 		gap: 15px;
 		margin-bottom: 25px;
 	}
+
 	h1 {
 		font-size: 24px;
 	}
+
+	.dashboard-grid {
+		grid-template-columns: 1fr; /* 1 colonna singola su cellulari */
+	}
+
 	.stats-row {
 		flex-direction: column;
 		gap: 15px;
+	}
+
+	.section-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
+	}
+
+	.popup-actions {
+		flex-direction: column; /* Impila i bottoni su schermi piccoli */
 	}
 }

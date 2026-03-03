@@ -22,7 +22,7 @@
             UniTorV E-Vote
         </a>
 
-        <a href="./login.html" class="btn-login">
+        <a href="./login.html" class="btn-login" id="loginBtn">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
@@ -84,5 +84,34 @@
     </footer>
 
 </body>
+<script>
+    document.getElementById('loginBtn').addEventListener('click', function (e) {
+        // Recuperiamo i dati dal localStorage
+        const token = localStorage.getItem("token");
+        const userData = localStorage.getItem("user");
+
+        if (token && userData) {
+            // Se esistono, blocchiamo il link naturale verso login.html
+            e.preventDefault();
+
+            try {
+                const user = JSON.parse(userData);
+                const ruolo = user.classe.toLowerCase();
+
+                // Reindirizziamo in base al ruolo salvato
+                if (ruolo === "ceo") {
+                    window.location.href = "ceo_dashboard.html";
+                } else {
+                    window.location.href = "member_dashboard.html";
+                }
+            } catch (error) {
+                // Se i dati nel localStorage sono corrotti, proseguiamo verso login.html
+                console.error("Dati sessione corrotti");
+                localStorage.clear();
+            }
+        }
+        // Se non ci sono dati, non facciamo nulla e il browser seguirà il link href="./login.html"
+    });
+</script>
 
 </html>

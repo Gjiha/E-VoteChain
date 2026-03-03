@@ -9,9 +9,8 @@ async function handleLogin(e) {
 	const walletValue = walletInput.value.trim();
 	const pswValue = passwordInput.value;
 
-	// Feedback visivo: disabilita pulsante o cambia testo
 	btnText.innerText = "Verifica in corso...";
-	msg.innerText = ""; // Pulisce messaggi precedenti
+	msg.innerText = "";
 
 	try {
 		const response = await fetch(
@@ -28,6 +27,7 @@ async function handleLogin(e) {
 			},
 		);
 
+		// LEGGIAMO IL JSON UNA SOLA VOLTA QUI
 		const result = await response.json();
 
 		if (response.ok) {
@@ -35,10 +35,14 @@ async function handleLogin(e) {
 			msg.style.color = "green";
 			msg.innerText = "Login effettuato! Reindirizzamento...";
 
-			// Salviamo i dati dell'utente (opzionale) nel localStorage
+			// 1. Salviamo il TOKEN JWT
+			if (result.token) {
+				localStorage.setItem("token", result.token);
+			}
+
+			// 2. Salviamo i DATI UTENTE
 			localStorage.setItem("user", JSON.stringify(result.data));
 
-			// Esempio: reindirizza dopo 1 secondo
 			const ruolo = result.data.classe.toLowerCase();
 
 			setTimeout(() => {
@@ -49,13 +53,14 @@ async function handleLogin(e) {
 				}
 			}, 1000);
 		} else {
-			// LOGIN FALLITO (401, 404, ecc.)
-			const bodyErrore = await response.text();
-			console.log("RISPOSTA DEL SERVER (HTML):", bodyErrore);
+			// LOGIN FALLITO (Il server ha risposto con errore)
+			// Usiamo il messaggio che arriva dal JSON del server
+			msg.style.color = "red";
+			msg.innerText = result.message || "Errore durante il login";
+			console.log("Dettagli errore server:", result);
 		}
 	} catch (error) {
 		console.error("Errore fetch:", error);
-		console.log(error);
 		msg.style.color = "red";
 		msg.innerText = "Impossibile collegarsi al server.";
 	} finally {
