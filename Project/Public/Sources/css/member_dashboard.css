@@ -1,7 +1,7 @@
-/* --- STILI CONDIVISI (Palette Tor Vergata) --- */
+/* --- VARIABILI COLORI (Palette Tor Vergata) --- */
 :root {
-	--tv-green: #006747;
-	--tv-green-light: #e6f0ec; /* Verde molto chiaro per sfondi box */
+	--tv-green: #006747; /* Verde Tor Vergata Approssimativo */
+	--tv-green-dark: #004d35;
 	--white: #ffffff;
 	--black: #1a1a1a;
 	--gray-light: #f4f6f8;
@@ -9,6 +9,7 @@
 	--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* --- RESET E BASE --- */
 * {
 	margin: 0;
 	padding: 0;
@@ -21,21 +22,22 @@ body {
 	color: var(--black);
 	display: flex;
 	height: 100vh;
-	overflow: hidden;
+	overflow: hidden; /* Evita doppio scroll */
 }
 
-/* --- SIDEBAR --- */
+/* --- SIDEBAR (Storico) --- */
 aside {
-	width: 260px;
+	width: 280px;
 	background-color: var(--white);
 	border-right: 1px solid #e0e0e0;
-	padding: 20px;
 	display: flex;
 	flex-direction: column;
+	padding: 20px;
+	height: 100%;
 }
 
 .brand {
-	font-size: 18px;
+	font-size: 20px;
 	font-weight: 700;
 	color: var(--tv-green);
 	margin-bottom: 30px;
@@ -44,31 +46,64 @@ aside {
 	gap: 10px;
 }
 
-.menu-label {
-	font-size: 12px;
+.history-title {
+	font-size: 14px;
 	text-transform: uppercase;
-	color: #999;
-	margin-bottom: 10px;
+	color: var(--gray-text);
+	font-weight: 700;
+	margin-bottom: 15px;
 	letter-spacing: 1px;
 }
 
 .history-list {
 	list-style: none;
-	overflow-y: auto;
-	flex: 1;
-}
-.history-item {
-	padding: 12px;
-	border-bottom: 1px solid #f0f0f0;
-	font-size: 14px;
-}
-.history-item .date {
-	font-size: 11px;
-	color: var(--tv-green);
-	font-weight: bold;
+	overflow-y: auto; /* Scroll se lo storico è lungo */
 }
 
-/* --- MAIN CONTENT --- */
+.history-item {
+	padding: 15px;
+	border-bottom: 1px solid #f0f0f0;
+	cursor: pointer;
+	transition: background 0.2s;
+	border-radius: 6px;
+}
+
+.history-item:hover {
+	background-color: #f9f9f9;
+}
+
+.history-date {
+	font-size: 12px;
+	color: var(--tv-green);
+	font-weight: 500;
+}
+
+.history-name {
+	font-size: 14px;
+	font-weight: 500;
+	margin-top: 4px;
+	color: var(--black);
+}
+
+.status-badge {
+	font-size: 10px;
+	padding: 2px 6px;
+	border-radius: 4px;
+	background-color: #eee;
+	color: #555;
+	margin-top: 5px;
+	display: inline-block;
+}
+
+.status-closed {
+	background-color: #e0e0e0;
+}
+.status-verified {
+	background-color: #d4edda;
+	color: #155724;
+}
+
+/* --- MAIN CONTENT (Central) --- */
 main {
 	flex: 1;
 	padding: 40px;
@@ -79,154 +114,201 @@ header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 30px;
+	margin-bottom: 40px;
 }
+
 h1 {
-	font-size: 26px;
+	font-size: 28px;
 	font-weight: 300;
 }
+
 h1 span {
 	font-weight: 700;
 	color: var(--tv-green);
 }
 
-.profile-badge {
+.user-profile {
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	background: white;
-	padding: 8px 15px;
-	border-radius: 30px;
-	box-shadow: var(--shadow);
+	gap: 15px;
 }
+
 .avatar {
-	width: 32px;
-	height: 32px;
-	background: var(--tv-green);
-	color: white;
+	width: 40px;
+	height: 40px;
+	background-color: var(--tv-green);
+	color: var(--white);
 	border-radius: 50%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	font-size: 14px;
+	font-weight: bold;
 }
 
-/* --- GRID WIDGETS --- */
-.grid-container {
+/* --- GRID LAYOUT PER I PULSANTI E WIDGET --- */
+.dashboard-grid {
 	display: grid;
-	grid-template-columns: 2fr 1fr; /* 2 colonne: Azioni larghe, Profilo stretto */
+	grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 	gap: 25px;
+	margin-bottom: 40px;
 }
 
+/* --- CARDS / PULSANTI --- */
 .card {
-	background: var(--white);
-	padding: 25px;
+	background-color: var(--white);
+	padding: 30px;
 	border-radius: 12px;
 	box-shadow: var(--shadow);
-	margin-bottom: 25px;
+	transition:
+		transform 0.2s,
+		box-shadow 0.2s;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 200px;
+	border-left: 5px solid transparent;
+	cursor: pointer;
 }
 
-.card-title {
-	font-size: 18px;
-	font-weight: 700;
-	margin-bottom: 15px;
+.card:hover {
+	transform: translateY(-5px);
+	box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Stili specifici per le card */
+a:link,
+a:visited {
+	color: black;
+	text-decoration: none;
+}
+
+.card-action {
+	border-left-color: var(--tv-green);
+}
+
+.card-login {
+	border-left-color: var(--tv-green);
+}
+
+.card-settings {
+	border-left-color: var(--black);
+}
+
+.icon-large {
+	font-size: 40px;
+	margin-bottom: 20px;
+	color: var(--tv-green);
+}
+
+.card h3 {
+	font-size: 20px;
+	margin-bottom: 10px;
+}
+
+.card p {
+	font-size: 14px;
+	color: var(--gray-text);
+}
+
+/* --- LIVE STATUS SECTION (Feature Immaginata) --- */
+.live-section {
+	background-color: var(--white);
+	padding: 30px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+}
+
+.section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	border-bottom: 2px solid var(--gray-light);
+	padding-bottom: 10px;
+}
+
+.live-indicator {
 	display: flex;
 	align-items: center;
-	gap: 10px;
+	gap: 8px;
+	color: var(--tv-green);
+	font-weight: bold;
 }
 
-/* WIDGET: RIUNIONE ATTIVA (Evidenza) */
-.active-meeting {
-	border-left: 5px solid var(--tv-green);
-	background-color: var(
-		--tv-green-light
-	); /* Leggero sfondo verde per risaltare */
+.dot {
+	width: 10px;
+	height: 10px;
+	background-color: var(--tv-green);
+	border-radius: 50%;
+	animation: pulse 2s infinite;
 }
 
-.meeting-details {
-	margin: 15px 0;
-	font-size: 14px;
-	color: #444;
-}
-.meeting-details p {
-	margin-bottom: 5px;
+@keyframes pulse {
+	0% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.4;
+	}
+	100% {
+		opacity: 1;
+	}
 }
 
-.action-buttons {
+/* Statistiche semplici */
+.stats-row {
 	display: flex;
-	gap: 15px;
+	gap: 40px;
 	margin-top: 20px;
 }
 
+.stat-item h4 {
+	font-size: 12px;
+	color: var(--gray-text);
+	text-transform: uppercase;
+}
+
+.stat-item .number {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--black);
+}
+
+/* Bottone primario */
 .btn {
+	background-color: var(--tv-green);
+	color: var(--white);
+	border: none;
 	padding: 10px 20px;
 	border-radius: 6px;
-	border: none;
-	font-weight: 600;
 	cursor: pointer;
-	transition: 0.2s;
-}
-.btn-primary {
-	background-color: var(--tv-green);
-	color: white;
-}
-.btn-primary:hover {
-	background-color: #004d35;
-}
-
-.btn-outline {
-	background-color: transparent;
-	border: 2px solid var(--tv-green);
-	color: var(--tv-green);
-}
-.btn-outline:hover {
-	background-color: var(--tv-green);
-	color: white;
-}
-
-/* WIDGET: DATI AZIENDALI */
-.info-row {
-	display: flex;
-	justify-content: space-between;
-	padding: 10px 0;
-	border-bottom: 1px solid #eee;
-	font-size: 14px;
-}
-.info-label {
-	color: var(--gray-text);
-}
-.info-value {
 	font-weight: 500;
+	transition: background 0.2s;
 }
 
-.wallet-address {
-	font-family: monospace;
-	background: #eee;
-	padding: 5px;
-	border-radius: 4px;
-	font-size: 12px;
-	word-break: break-all;
-	margin-top: 5px;
+.btn:hover {
+	background-color: var(--tv-green-dark);
 }
 
 /* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
 @media (max-width: 768px) {
 	body {
 		flex-direction: column;
-		overflow: auto;
+		overflow: auto; /* Riabilita lo scroll generale */
 	}
 	aside {
 		width: 100%;
 		height: auto;
 		border-right: none;
 		border-bottom: 1px solid #e0e0e0;
+		padding: 15px;
 	}
 	.history-list {
 		display: flex;
 		gap: 10px;
 		overflow-x: auto;
 		white-space: nowrap;
-		padding-bottom: 5px;
+		padding-bottom: 10px;
 	}
 	.history-item {
 		flex: 0 0 auto;
@@ -246,14 +328,8 @@ h1 span {
 	h1 {
 		font-size: 24px;
 	}
-	.grid-container {
-		grid-template-columns: 1fr; /* Passa a 1 singola colonna */
-	}
-	.action-buttons {
+	.stats-row {
 		flex-direction: column;
-	}
-	.btn {
-		width: 100%;
-		text-align: center;
+		gap: 15px;
 	}
 }

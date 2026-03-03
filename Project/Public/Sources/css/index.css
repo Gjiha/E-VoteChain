@@ -173,23 +173,53 @@ footer {
 	border-top: 1px solid #e0e0e0;
 }
 
-/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+/* --- RESPONSIVE DESKTOP-FIRST --- */
+
+/* Tablet (fino a 992px) */
+@media (max-width: 992px) {
+	.hero {
+		padding: 80px 30px;
+	}
+
+	.hero h1 {
+		font-size: 40px; /* Scaliamo il titolo gradualmente */
+	}
+}
+
+/* Mobile (fino a 768px) */
 @media (max-width: 768px) {
 	nav {
 		padding: 15px 20px;
 		flex-direction: column;
 		gap: 15px;
 	}
+
+	.btn-login {
+		width: 100%; /* Estende il bottone su mobile per un tocco più facile */
+		justify-content: center; /* Centra il testo e l'icona nel bottone esteso */
+	}
+
 	.hero {
 		padding: 60px 20px;
 	}
+
 	.hero h1 {
 		font-size: 32px;
 	}
+
 	.hero p {
 		font-size: 16px;
+		margin-bottom: 30px;
 	}
+
 	.features {
 		padding: 40px 20px;
+		gap: 20px;
+		/* Risolve il problema dell'overflow orizzontale forzando una singola colonna */
+		grid-template-columns: 1fr;
+	}
+
+	.card {
+		padding: 30px 20px;
 	}
 }
