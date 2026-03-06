@@ -4,50 +4,71 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fetchUserFromDb = require("../middleware/middleware.js");
 
-// In produzione, sposta questa stringa in un file .env
-const JWT_SECRET = "la_tua_chiave_segreta_super_sicura_2026";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
-	console.log("Richiesta login per wallet:", req.body.id_wallet);
+	console.log("Richiesta ricevuta per wallet:", req.body.id_wallet);
 
 	try {
-		const { psw } = req.body;
-		const utente = req.dbUser; // Recuperato dal tuo middleware
+		const { psw, token } = req.body;
+		const utente = req.dbUser;
 
+		// =========================================
+		// CASO 1: VERIFICA DEL TOKEN (Da index.html)
+		// =========================================
+		if (token) {
+			try {
+				// jwt.verify "crasha" se il token non è valido.
+				jwt.verify(token, JWT_SECRET);
+
+				// Se arriva qui, il token è perfettamente valido!
+				// FIX: Aggiunto 'return' per fermare il codice qui.
+				return res
+					.status(200)
+					.json({ message: "Token valido, accesso consentito." });
+			} catch (jwtError) {
+				// Il token è scaduto o manomesso
+				return res
+					.status(401)
+					.json({ message: "Token scaduto o non valido." });
+			}
+		}
+
+		// =========================================
+		// CASO 2: LOGIN NORMALE (Da login.html)
+		// =========================================
 		if (!psw) {
 			return res.status(400).json({ message: "Password mancante" });
 		}
 
-		// Verifica password con bcrypt
 		const match = await bcrypt.compare(psw, utente.psw);
 
 		if (match) {
-			// --- 2. GENERAZIONE DEL TOKEN JWT ---
-			// Creiamo il payload con i dati non sensibili
 			const payload = {
 				id_wallet: utente.id_wallet,
 				classe: utente.classe,
-				// puoi aggiungere altri campi utili al frontend o ai controlli futuri
 			};
 
-			// Firmiamo il token (scade tra 2 ore)
-			const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "2h" });
+			const newToken = jwt.sign(payload, JWT_SECRET, {
+				expiresIn: process.env.JWT_EXPIRES_IN,
+			});
 
-			// Rimuoviamo la password dall'oggetto utente per sicurezza
 			delete utente.psw;
 
-			// --- 3. INVIO RISPOSTA CON TOKEN ---
-			res.status(200).json({
+			// FIX: Aggiunto 'return' anche qui
+			return res.status(200).json({
 				message: "Login effettuato",
-				token: token, // <--- Il frontend lo riceverà qui
+				token: newToken,
 				data: utente,
 			});
 		} else {
-			res.status(401).json({ message: "Password errata" });
+			return res.status(401).json({ message: "Password errata" });
 		}
 	} catch (err) {
 		console.error("Errore interno:", err);
-		res.status(500).json({ message: "Errore server durante il login" });
+		return res
+			.status(500)
+			.json({ message: "Errore server durante il login" });
 	}
 });
 

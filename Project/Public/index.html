@@ -85,33 +85,54 @@
 
 </body>
 <script>
-    document.getElementById('loginBtn').addEventListener('click', function (e) {
-        // Recuperiamo i dati dal localStorage
+
+    document.getElementById('loginBtn').addEventListener('click', async function (e) {
         const token = localStorage.getItem("token");
-        const userData = localStorage.getItem("user");
+        const userDataString = localStorage.getItem("user");
 
-        if (token && userData) {
-            // Se esistono, blocchiamo il link naturale verso login.html
-            e.preventDefault();
+        // Se mancano i dati nel localStorage, non facciamo nulla.
+        // Il browser seguirà il link verso "./login.html" naturalmente.
+        if (!token || !userDataString) return;
 
-            try {
-                const user = JSON.parse(userData);
+        // Se abbiamo i dati, FERMIAMO il link e interroghiamo il server
+        e.preventDefault();
+
+        try {
+            // FIX: Dobbiamo prima convertire la stringa in oggetto!
+            const user = JSON.parse(userDataString);
+
+            const response = await fetch("http://localhost:30000/api/v1/loginCheck", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    id_wallet: user.id_wallet,
+                    token: token,
+                }),
+            });
+
+            // FIX: Controlliamo se il server ha detto che il token è valido (status 200)
+            if (response.ok) {
                 const ruolo = user.classe.toLowerCase();
-
-                // Reindirizziamo in base al ruolo salvato
                 if (ruolo === "ceo") {
                     window.location.href = "ceo_dashboard.html";
                 } else {
                     window.location.href = "member_dashboard.html";
                 }
-            } catch (error) {
-                // Se i dati nel localStorage sono corrotti, proseguiamo verso login.html
-                console.error("Dati sessione corrotti");
+            } else {
+                // Il server ha rifiutato il token (scaduto o errato)
+                console.warn("Token non valido. Pulizia sessione...");
                 localStorage.clear();
+                window.location.href = "./login.html";
             }
+        } catch (error) {
+            console.error("Errore durante la verifica:", error);
+            localStorage.clear();
+            window.location.href = "./login.html";
         }
-        // Se non ci sono dati, non facciamo nulla e il browser seguirà il link href="./login.html"
     });
+
 </script>
 
 </html>

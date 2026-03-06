@@ -1,7 +1,7 @@
 //Questa funzione data una classe e una chiave ti tira fuori il value che può essere un qualunque JSON
 async function getKV(cls, key) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -29,7 +29,7 @@ async function getKV(cls, key) {
 //Aggiungi una coppia classe chiave con associato un qualsivoglia valore
 async function addKV(cls, key, value) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -58,7 +58,7 @@ async function addKV(cls, key, value) {
 //Elimina una coppia chiave valore
 async function delKV(cls, key) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -86,7 +86,7 @@ async function delKV(cls, key) {
 //Ritorna lo storico delle operazioni effettuate sulla coppia chiave-valore
 async function getHistoryKV(cls, key) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -114,7 +114,7 @@ async function getHistoryKV(cls, key) {
 //Ritorna il numero di chiavi chiamate in quel modo associate alla classe
 async function getNumKV(cls, key) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -142,7 +142,7 @@ async function getNumKV(cls, key) {
 //Ritorna tutte le classi nel sistema
 async function getClasses() {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -168,7 +168,7 @@ async function getClasses() {
 //Ritorna tutte le chiavi associate alla classe messa in input
 async function getKeysCopy(cls) {
 	try {
-		const response = await fetch("http://localhost:9999/api", {
+		const response = await fetch(process.env.MAPPING_API_URL, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
