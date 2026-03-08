@@ -7,6 +7,20 @@ function formatItalianDate(dateObject) {
 	return formattedDate.replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+// --- NUOVO: Dizionario globale per mappare gli ID alle riunioni ---
+window.meetingsMap = {};
+
+// --- NUOVO: Funzione per il redirect alla pagina meeting.html ---
+window.vaiADettaglioRiunione = function (meetingId) {
+	const meetingData = window.meetingsMap[meetingId];
+	if (meetingData) {
+		localStorage.setItem("currentMeeting", JSON.stringify(meetingData));
+		window.location.href = "meeting.html";
+	} else {
+		alert("Errore: Dati della riunione non trovati.");
+	}
+};
+
 document.addEventListener("DOMContentLoaded", () => {
 	// 1. Inizializziamo il profilo utente
 	const userString = localStorage.getItem("user");
@@ -126,6 +140,9 @@ async function fetchMeetingHistory(userEmail) {
 		}
 
 		latestMeetings.forEach((meeting) => {
+			// --- NUOVO: Salviamo il meeting nella mappa globale ---
+			window.meetingsMap[meeting.id] = meeting;
+
 			const title = meeting.titolo || `Riunione ${meeting.id}`;
 			const dateToFormat = meeting.dataInizio
 				? new Date(meeting.dataInizio)
@@ -133,15 +150,12 @@ async function fetchMeetingHistory(userEmail) {
 
 			let badgeClass = "status-closed";
 			let badgeText = "Archiviata";
-			let verbaleLinkHTML = "";
 
 			const hasVerbale = meeting.verbale && meeting.verbale.trim() !== "";
 
 			if (hasVerbale) {
 				badgeClass = "status-verified";
 				badgeText = "Conclusa & Verificata";
-				const fullVerbaleUrl = `${SERVER_URL}${meeting.verbale}`;
-				verbaleLinkHTML = `<a href="${fullVerbaleUrl}" target="_blank" class="verbale-link" style="font-size: 0.85em; text-decoration: underline; color: #0056b3; margin-top: 4px; display: inline-block;">Visualizza verbale</a>`;
 			} else if (meeting.dataFine) {
 				const now = new Date();
 				const dataFine = new Date(meeting.dataFine);
@@ -153,18 +167,23 @@ async function fetchMeetingHistory(userEmail) {
 
 			const li = document.createElement("li");
 			li.className = "history-item";
+			li.style.cursor = "pointer"; // Rende palese che è cliccabile
 
+			// --- NUOVO: Aggiungiamo il listener al click ---
+			li.onclick = () => window.vaiADettaglioRiunione(meeting.id);
+
+			// --- AGGIORNATO: Rimosso il link al PDF, inserito "Vedi dettagli" ---
 			li.innerHTML = `
                 <div class="history-date">${formatItalianDate(dateToFormat)}</div>
                 <div class="history-name">${title}</div>
-                ${verbaleLinkHTML}
+                <div style="font-size: 0.85em; color: var(--tv-green); margin-top: 4px; font-weight: 500;">Vedi dettagli &rarr;</div>
                 <span class="status-badge ${badgeClass}" style="margin-top: 8px; display: inline-block;">${badgeText}</span>
             `;
 
 			historyList.appendChild(li);
 		});
 
-		// --- NUOVO: LOGICA POP-UP RIUNIONE IN CORSO ---
+		// --- LOGICA POP-UP RIUNIONE IN CORSO ---
 		if (latestMeetings.length > 0) {
 			const lastMeeting = latestMeetings[0]; // Prendiamo la riunione più recente in assoluto
 			const now = new Date();
@@ -192,7 +211,7 @@ async function fetchMeetingHistory(userEmail) {
 	}
 }
 
-// --- NUOVE FUNZIONI PER IL POP-UP ---
+// --- FUNZIONI PER IL POP-UP ---
 
 // Funzione per aggiornare e mostrare il pop-up esistente nell'HTML
 function showActiveMeetingPopup(meeting) {

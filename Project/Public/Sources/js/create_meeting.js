@@ -19,10 +19,20 @@ document.addEventListener("DOMContentLoaded", function () {
 			const timeoutId = setTimeout(() => controller.abort(), 10000);
 
 			try {
-				// 1️⃣ Upload PDF
+				// 1️⃣ CREAZIONE CHIAVE SPOSTATA QUI (Prima dell'upload)
+				const meetingKey = "reunion_" + Date.now();
+
+				// 2️⃣ Upload PDF (Rinominando il file con la meetingKey)
 				const file = document.getElementById("verbaleFile").files[0];
+				const fileExtension = file.name.split(".").pop(); // Recupera l'estensione (es. pdf)
+
 				const formData = new FormData();
-				formData.append("verbale", file);
+				// Il terzo parametro forza il nome del file che arriverà al server!
+				formData.append(
+					"verbale",
+					file,
+					`${meetingKey}.${fileExtension}`,
+				);
 
 				const uploadRes = await fetch(
 					"http://localhost:30000/api/v1/uploadVerbale",
@@ -42,14 +52,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 
 				const uploadData = await uploadRes.json();
-				const filePath = uploadData.path;
+				const filePath = uploadData.path; // Il backend ora dovrebbe restituire il path col nuovo nome
 
 				status.innerText =
 					"Salvataggio dati riunione nel database (Step 2/2)...";
 
-				// 2️⃣ Creazione dati riunione
-				const meetingKey = "reunion_" + Date.now();
-
+				// 3️⃣ Creazione dati riunione
 				const partecipantiRaw =
 					document.getElementById("partecipanti").value;
 				const partecipantiArray = partecipantiRaw
@@ -59,13 +67,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 				const meetingData = {
 					titolo: document.getElementById("titolo").value,
+					numeroVotazioni: parseInt(
+						document.getElementById("numeroVotazioni").value,
+						10,
+					),
 					partecipanti: partecipantiArray,
 					dataInizio: document.getElementById("dataInizio").value,
 					dataFine: document.getElementById("dataFine").value,
 					verbale: filePath,
 				};
 
-				// 3️⃣ Salvataggio nel KV
+				// 4️⃣ Salvataggio nel KV
 				const addRes = await fetch(
 					"http://localhost:30000/api/v1/addKv",
 					{

@@ -1,0 +1,111 @@
+main {
+	max-width: auto;
+	margin: 0;
+}
+
+.back-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: var(--tv-green);
+	font-weight: 500;
+}
+
+.table-container {
+	background: var(--white);
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	overflow-x: auto; /* Permette lo scroll orizzontale su schermi piccoli */
+	border-top: 5px solid var(--tv-green);
+}
+
+.audit-table {
+	width: 100%;
+	border-collapse: collapse;
+	min-width: 800px; /* Evita che si schiacci troppo su mobile */
+}
+
+.audit-table th,
+.audit-table td {
+	padding: 18px 20px;
+	text-align: left;
+	border-bottom: 1px solid var(--gray-light);
+	font-size: 14px;
+}
+
+.audit-table th {
+	background-color: #fafafa;
+	color: var(--gray-text);
+	font-weight: 700;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 0.5px;
+}
+
+.audit-table tbody tr:hover {
+	background-color: #fcfcfc;
+}
+
+.audit-table tbody tr:last-child td {
+	border-bottom: none;
+}
+
+.loading-cell {
+	text-align: center;
+	padding: 40px !important;
+	color: var(--gray-text);
+	font-style: italic;
+}
+
+/* Badge personalizzati per la tabella */
+.status-badge {
+	padding: 6px 12px;
+	border-radius: 20px;
+	font-size: 12px;
+	font-weight: 600;
+	display: inline-block;
+}
+
+.status-active {
+	background-color: #fff3cd;
+	color: #856404;
+}
+
+.status-verified {
+	background-color: #d4edda;
+	color: #155724;
+}
+
+.status-closed {
+	background-color: #e2e3e5;
+	color: #383d41;
+}
+
+.btn-action {
+	display: inline-block;
+	padding: 8px 16px;
+	background-color: transparent;
+	border: 2px solid var(--tv-green);
+	color: var(--tv-green);
+	border-radius: 6px;
+	text-decoration: none;
+	font-size: 13px;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.2s;
+	font-family: "Roboto", sans-serif;
+}
+
+.btn-action:hover {
+	background-color: var(--tv-green);
+	color: var(--white);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 6px rgba(0, 103, 71, 0.2);
+}
+/* Adattamento Responsive */
+@media (max-width: 768px) {
+	.table-container {
+		border-radius: 8px;
+	}
+}

@@ -1,3 +1,17 @@
+// Dizionario globale per mappare gli ID alle riunioni
+window.meetingsMap = {};
+
+// Funzione per il redirect, identica a quella usata in audit_report
+window.vaiADettaglioRiunione = function (meetingId) {
+	const meetingData = window.meetingsMap[meetingId];
+	if (meetingData) {
+		localStorage.setItem("currentMeeting", JSON.stringify(meetingData));
+		window.location.href = "meeting.html";
+	} else {
+		alert("Errore: Dati della riunione non trovati.");
+	}
+};
+
 document.addEventListener("DOMContentLoaded", () => {
 	fetchMeetingHistory();
 });
@@ -5,13 +19,10 @@ document.addEventListener("DOMContentLoaded", () => {
 async function fetchMeetingHistory() {
 	const historyList = document.querySelector(".history-list");
 
-	// Abbiamo impostato la classe esatta che ci hai mostrato nel JSON
 	const TARGET_CLASS = "Reunion";
-	// Base URL del tuo server per i download
 	const SERVER_URL = "http://localhost:30000";
 
 	try {
-		// 1. Chiamiamo getKeysCopy per avere la lista delle chiavi
 		const keysResponse = await fetch(
 			`${SERVER_URL}/api/v1/getKeysCopy?class=${TARGET_CLASS}`,
 		);
@@ -23,7 +34,6 @@ async function fetchMeetingHistory() {
 		const keysJson = await keysResponse.json();
 		const rawKeys = keysJson.data?.keys || [];
 
-		// Filtriamo le chiavi: prendiamo la stringa interna e ignoriamo la root "0x"
 		const validKeys = rawKeys
 			.map((k) => k[0])
 			.filter((k) => k && k.startsWith("reunion_"));
@@ -34,7 +44,6 @@ async function fetchMeetingHistory() {
 			return;
 		}
 
-		// 2. Creiamo un array di "Promesse" per recuperare i valori in parallelo
 		const meetingPromises = validKeys.map(async (key) => {
 			try {
 				const kvResponse = await fetch(
@@ -44,7 +53,6 @@ async function fetchMeetingHistory() {
 
 				const kvJson = await kvResponse.json();
 
-				// Estrapoliamo il blocco 'value' che contiene i veri dati
 				let meetingData = kvJson.data?.value || kvJson.answer?.value;
 
 				if (typeof meetingData === "string") {
@@ -73,13 +81,11 @@ async function fetchMeetingHistory() {
 			}
 		});
 
-		// 3. Eseguiamo tutte le fetch in parallelo
 		let meetings = await Promise.all(meetingPromises);
 
-		// 4. Puliamo l'array dai valori nulli
 		meetings = meetings.filter((m) => m !== null);
 
-		// 5. Ordiniamo dalla più recente alla più vecchia e prendiamo le prime 4
+		// Ordiniamo dalla più recente alla più vecchia e prendiamo le prime 4
 		const latestMeetings = meetings
 			.sort((a, b) => b.timestamp - a.timestamp)
 			.slice(0, 4);
@@ -92,33 +98,24 @@ async function fetchMeetingHistory() {
 			return;
 		}
 
-		// 6. Generiamo l'HTML con i dati REALI dal JSON
 		latestMeetings.forEach((meeting) => {
-			// Estrapoliamo i campi mappandoli con quelli del tuo JSON
+			// 1. Salviamo il meeting nella mappa globale
+			window.meetingsMap[meeting.id] = meeting;
+
 			const title = meeting.titolo || `Riunione ${meeting.id}`;
 			const dateToFormat = meeting.dataInizio
 				? new Date(meeting.dataInizio)
 				: new Date(meeting.timestamp);
 
-			// --- LOGICA DELLO STATO E DEL VERBALE ---
 			let badgeClass = "status-closed";
 			let badgeText = "Archiviata";
-			let verbaleLinkHTML = ""; // Partiamo dal presupposto che non ci sia il link
 
 			const hasVerbale = meeting.verbale && meeting.verbale.trim() !== "";
 
-			// Se c'è un verbale caricato, è sicuramente Conclusa & Verificata
 			if (hasVerbale) {
 				badgeClass = "status-verified";
 				badgeText = "Conclusa & Verificata";
-
-				// Creiamo l'URL completo attaccando l'host del server al path (es. http://localhost:30000/uploads/...)
-				// Usiamo target="_blank" per aprire il PDF in una nuova scheda
-				const fullVerbaleUrl = `${SERVER_URL}${meeting.verbale}`;
-				verbaleLinkHTML = `<a href="${fullVerbaleUrl}" target="_blank" class="verbale-link" style="font-size: 0.85em; text-decoration: underline; color: #0056b3; margin-top: 4px; display: inline-block;">Visualizza verbale</a>`;
-			}
-			// Altrimenti, controlliamo se la riunione è ancora in corso/da farsi in base alle date
-			else if (meeting.dataFine) {
+			} else if (meeting.dataFine) {
 				const now = new Date();
 				const dataFine = new Date(meeting.dataFine);
 				if (dataFine > now) {
@@ -127,15 +124,17 @@ async function fetchMeetingHistory() {
 				}
 			}
 
-			// Creazione dell'elemento HTML
 			const li = document.createElement("li");
 			li.className = "history-item";
 
-			// Inseriamo l'HTML. verbaleLinkHTML sarà vuoto se non c'è il verbale, altrimenti mostrerà il tag <a>
+			// 2. Rendiamo l'intero elemento cliccabile collegandolo alla funzione
+			li.onclick = () => window.vaiADettaglioRiunione(meeting.id);
+
+			// 3. Modifichiamo l'HTML interno per mostrare la dicitura "Vedi dettagli"
 			li.innerHTML = `
                 <div class="history-date">${formatItalianDate(dateToFormat)}</div>
                 <div class="history-name">${title}</div>
-                ${verbaleLinkHTML}
+                <div style="font-size: 0.85em; color: var(--tv-green); margin-top: 4px; font-weight: 500;">Vedi dettagli &rarr;</div>
                 <span class="status-badge ${badgeClass}" style="margin-top: 8px; display: inline-block;">${badgeText}</span>
             `;
 
@@ -152,19 +151,20 @@ async function fetchMeetingHistory() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Recupera la stringa dal localStorage
 	const userString = localStorage.getItem("user");
 
 	if (userString) {
-		// 2. Trasforma la stringa in un oggetto JavaScript
 		const user = JSON.parse(userString);
 
-		// 3. Accedi alla proprietà e inseriscila nell'HTML
-		document.getElementById("userName").innerText =
-			`${user.nome} ${user.cognome}`;
-		document.getElementById("userInitials").innerText = (
-			user.nome[0] + user.cognome[0]
-		).toUpperCase();
+		// Controllo aggiuntivo per evitare errori se gli elementi non esistono nella pagina
+		const userNameEl = document.getElementById("userName");
+		const userInitialsEl = document.getElementById("userInitials");
+
+		if (userNameEl) userNameEl.innerText = `${user.nome} ${user.cognome}`;
+		if (userInitialsEl)
+			userInitialsEl.innerText = (
+				user.nome[0] + user.cognome[0]
+			).toUpperCase();
 	}
 });
 

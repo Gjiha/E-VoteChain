@@ -1,0 +1,95 @@
+/* --- LAYOUT DETTAGLI RIUNIONE --- */
+
+.back-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: var(--tv-green);
+	font-weight: 500;
+}
+
+.details-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+	gap: 25px;
+	margin-bottom: 40px;
+}
+
+.detail-card {
+	background: var(--white);
+	padding: 25px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	border-top: 4px solid var(--tv-green);
+}
+
+.detail-card h3 {
+	font-size: 16px;
+	color: var(--tv-green);
+	margin-bottom: 15px;
+	border-bottom: 1px solid var(--gray-light);
+	padding-bottom: 10px;
+}
+
+.detail-card p {
+	margin-bottom: 10px;
+	font-size: 15px;
+}
+
+/* Pulsanti specifici per questa vista */
+.btn-outline {
+	display: inline-block;
+	background-color: transparent;
+	color: var(--tv-green);
+	border: 2px solid var(--tv-green);
+	padding: 10px 15px;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: bold;
+	text-align: center;
+	transition: all 0.2s;
+}
+
+.btn-outline:hover {
+	background-color: var(--tv-green);
+	color: var(--white);
+}
+
+/* Sezione Lista Partecipanti */
+.participants-section {
+	background: var(--white);
+	padding: 25px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+}
+
+.participants-section h3 {
+	font-size: 16px;
+	color: var(--black);
+	margin-bottom: 15px;
+}
+
+.wallet-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.wallet-list code {
+	background-color: var(--gray-light);
+	color: var(--black);
+	padding: 8px 12px;
+	border-radius: 4px;
+	border: 1px solid #e0e0e0;
+	font-family: monospace;
+	font-size: 14px;
+	word-break: break-all;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.details-grid {
+		grid-template-columns: 1fr;
+	}
+}

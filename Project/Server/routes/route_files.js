@@ -7,7 +7,7 @@ const storage = multer.diskStorage({
 		cb(null, "uploads/verbali/");
 	},
 	filename: function (req, file, cb) {
-		const uniqueName = Date.now() + "_" + file.originalname;
+		const uniqueName = file.originalname;
 		cb(null, uniqueName);
 	},
 });

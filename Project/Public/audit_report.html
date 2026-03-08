@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report di Audit - E-vote CEO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/css/ceo_dashboard.css">
+    <link rel="stylesheet" href="Sources/css/audit_report.css">
+    <script defer src="Sources/js/audit_report.js"></script>
+</head>
+
+<body>
+
+    <aside>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            UniTorV E-Vote
+        </div>
+        <div class="history-title">Menu</div>
+        <ul class="history-list">
+            <li class="history-item" onclick="window.location.href='javascript:history.go(-1)'">Torna alla Dashboard
+            </li>
+            <li class="history-item" onclick="handleLogout()">Logout</li>
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <a href="javascript:history.go(-1)" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Torna alla Dashboard
+            </a>
+            <div class="user-profile">
+                <span id="userNameHeader">Caricamento...</span>
+                <div class="avatar" id="userInitials">--</div>
+            </div>
+        </header>
+
+        <h1>Report delle <span>Riunioni</span></h1>
+        <p style="margin-bottom: 30px; color: var(--gray-text);">Archivio completo di tutte le assemblee registrate
+            sulla blockchain.</p>
+
+        <div class="table-container">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Data Creazione</th>
+                        <th>Titolo Assemblea</th>
+                        <th>Partecipanti</th>
+                        <th>Stato</th>
+                        <th>Azione</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                    <tr>
+                        <td colspan="5" class="loading-cell">Caricamento dati in corso dal database...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+
+</html>

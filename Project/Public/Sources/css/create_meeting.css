@@ -54,6 +54,7 @@ main {
 }
 
 input[type="text"],
+input[type="number"],
 input[type="datetime-local"],
 textarea {
 	width: 100%;
