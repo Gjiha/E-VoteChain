@@ -1,3 +1,4 @@
 Project/Server/.env
 Project/Server/uploads/verbali
 Project/Server/node_modules
+Project/Server/test.http
