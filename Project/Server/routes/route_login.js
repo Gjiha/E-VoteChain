@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const fetchUserFromDb = require("../middleware/middleware.js");
+const fetchUserFromDb = require("../middleware/fetch_db.js");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -20,6 +20,7 @@ router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
 			try {
 				// jwt.verify "crasha" se il token non è valido.
 				jwt.verify(token, JWT_SECRET);
+				console.log(jwt.verify(token, JWT_SECRET));
 
 				// Se arriva qui, il token è perfettamente valido!
 				// FIX: Aggiunto 'return' per fermare il codice qui.
