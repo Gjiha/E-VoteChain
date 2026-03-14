@@ -1,0 +1,51 @@
+/* --- manage_users.css --- */
+/* (Layout e tabella ereditati da ceo_dashboard.css e audit_report.css) */
+
+.stats-badge {
+	background-color: var(--tv-green);
+	color: var(--white);
+	padding: 8px 16px;
+	border-radius: 20px;
+	font-size: 14px;
+	font-weight: 600;
+	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Badges specifici per i ruoli utente */
+.role-badge {
+	font-size: 11px;
+	padding: 6px 10px;
+	border-radius: 6px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: inline-block;
+}
+
+.role-ceo {
+	background-color: #d4edda;
+	color: #155724;
+	border: 1px solid #c3e6cb;
+}
+
+.role-member {
+	background-color: #e2e3e5;
+	color: #383d41;
+	border: 1px solid #d6d8db;
+}
+
+.role-admin {
+	background-color: #cce5ff;
+	color: #004085;
+	border: 1px solid #b8daff;
+}
+
+.wallet-id {
+	font-family: monospace;
+	background-color: #f4f4f4;
+	padding: 4px 8px;
+	border-radius: 4px;
+	color: #d63384;
+	font-size: 13px;
+	border: 1px solid #e0e0e0;
+}

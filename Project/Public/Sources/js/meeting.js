@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	if (meeting.verbale) {
 		// Presumendo che il server restituisca un path valido, es: "http://localhost:30000/uploads/file.pdf"
 		// Se restituisce solo il nome file, concatenalo all'URL base.
-		docLink.href = "http://localhost:30000/" + meeting.verbale;
+		docLink.href = "http://localhost:30000" + meeting.verbale;
 	} else {
 		docLink.style.display = "none";
 	}

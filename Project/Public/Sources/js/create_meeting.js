@@ -1,10 +1,28 @@
-// Aspettiamo che tutto l'HTML sia caricato prima di attivare il codice
 document.addEventListener("DOMContentLoaded", function () {
+	// 1. INIZIALIZZAZIONE E RECUPERO TOKEN
+	const userString = localStorage.getItem("user");
+	const token = localStorage.getItem("token");
+
+	if (!userString || !token) {
+		window.location.href = "login.html";
+		return;
+	}
+
+	const user = JSON.parse(userString);
+
+	// Popolamento Header
+	const userNameHeader = document.getElementById("userNameHeader");
+	const userInitials = document.getElementById("userInitials");
+	if (userNameHeader)
+		userNameHeader.innerText = user.nome + " " + user.cognome;
+	if (userInitials)
+		userInitials.innerText = (user.nome[0] + user.cognome[0]).toUpperCase();
+
+	// 2. LOGICA DEL FORM DI CREAZIONE
 	const meetingForm = document.getElementById("meetingForm");
 
 	if (meetingForm) {
 		meetingForm.addEventListener("submit", async function (e) {
-			// Blocca il ricaricamento di default della pagina
 			e.preventDefault();
 
 			const status = document.getElementById("status");
@@ -14,30 +32,32 @@ document.addEventListener("DOMContentLoaded", function () {
 			status.style.color = "var(--gray-text)";
 			status.innerText = "Upload verbale in corso (Step 1/2)...";
 
-			// Creiamo un controller per sbloccare la fetch se il server si incanta (Timeout 10s)
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), 10000);
 
 			try {
-				// 1️⃣ CREAZIONE CHIAVE SPOSTATA QUI (Prima dell'upload)
+				// Creazione della chiave univoca
 				const meetingKey = "reunion_" + Date.now();
 
-				// 2️⃣ Upload PDF (Rinominando il file con la meetingKey)
+				// Upload PDF
 				const file = document.getElementById("verbaleFile").files[0];
-				const fileExtension = file.name.split(".").pop(); // Recupera l'estensione (es. pdf)
+				const fileExtension = file.name.split(".").pop();
 
 				const formData = new FormData();
-				// Il terzo parametro forza il nome del file che arriverà al server!
 				formData.append(
 					"verbale",
 					file,
 					`${meetingKey}.${fileExtension}`,
 				);
 
+				// Consigliato: Inviare il token anche per l'upload del file (se hai protetto la rotta)
 				const uploadRes = await fetch(
 					"http://localhost:30000/api/v1/uploadVerbale",
 					{
 						method: "POST",
+						headers: {
+							Authorization: `Bearer ${token}`,
+						},
 						body: formData,
 						signal: controller.signal,
 					},
@@ -52,12 +72,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				}
 
 				const uploadData = await uploadRes.json();
-				const filePath = uploadData.path; // Il backend ora dovrebbe restituire il path col nuovo nome
+				const filePath = uploadData.path;
 
 				status.innerText =
 					"Salvataggio dati riunione nel database (Step 2/2)...";
 
-				// 3️⃣ Creazione dati riunione
+				// Preparazione Dati riunione
 				const partecipantiRaw =
 					document.getElementById("partecipanti").value;
 				const partecipantiArray = partecipantiRaw
@@ -77,20 +97,29 @@ document.addEventListener("DOMContentLoaded", function () {
 					verbale: filePath,
 				};
 
-				// 4️⃣ Salvataggio nel KV
+				// --- MODIFICA CRUCIALE: Chiamata alla nuova rotta protetta ---
 				const addRes = await fetch(
-					"http://localhost:30000/api/v1/addKv",
+					"http://localhost:30000/api/v1/create-meeting",
 					{
 						method: "POST",
-						headers: { "Content-Type": "application/json" },
+						headers: {
+							"Content-Type": "application/json",
+							Authorization: `Bearer ${token}`, // <--- VERIFICA CHI SEI
+						},
 						signal: controller.signal,
 						body: JSON.stringify({
-							class: "Reunion",
-							key: meetingKey,
-							value: JSON.stringify(meetingData),
+							meetingKey: meetingKey,
+							meetingData: meetingData,
 						}),
 					},
 				);
+
+				// Gestione specifica degli errori di permessi (401/403)
+				if (addRes.status === 401 || addRes.status === 403) {
+					throw new Error(
+						"Accesso Negato: Solo l'amministratore (CEO) può creare nuove riunioni.",
+					);
+				}
 
 				if (!addRes.ok) {
 					const addData = await addRes.json().catch(() => ({}));
@@ -100,7 +129,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					);
 				}
 
-				clearTimeout(timeoutId); // Disattiviamo il timer se è andato tutto bene
+				clearTimeout(timeoutId);
 
 				// --- SUCCESSO ---
 				status.style.color = "#2e7d32";
@@ -115,13 +144,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				console.error("Errore di creazione:", err);
 				status.style.color = "red";
 
-				// Gestione degli errori specifica
 				if (err.name === "AbortError") {
 					status.innerText =
-						"Errore: Il server ci sta mettendo troppo tempo (Timeout). Il database blockchain potrebbe essere bloccato.";
+						"Errore: Il server ci sta mettendo troppo tempo (Timeout). Il database potrebbe essere bloccato.";
 				} else if (err.message.includes("Failed to fetch")) {
 					status.innerText =
-						"Errore: Impossibile contattare il server. Verifica che sia acceso e che non si sia riavviato (Nodemon).";
+						"Errore: Impossibile contattare il server. Verifica che sia acceso.";
 				} else {
 					status.innerText = "Errore: " + err.message;
 				}
@@ -133,23 +161,6 @@ document.addEventListener("DOMContentLoaded", function () {
 		});
 	} else {
 		console.error("Errore: Form 'meetingForm' non trovato nella pagina!");
-	}
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-	const userString = localStorage.getItem("user");
-
-	if (userString) {
-		const user = JSON.parse(userString);
-
-		// Popolamento Header
-		document.getElementById("userNameHeader").innerText =
-			user.nome + " " + user.cognome;
-		document.getElementById("userInitials").innerText = (
-			user.nome[0] + user.cognome[0]
-		).toUpperCase();
-	} else {
-		window.location.href = "login.html";
 	}
 });
 

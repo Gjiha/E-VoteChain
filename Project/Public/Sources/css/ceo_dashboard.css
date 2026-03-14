@@ -89,14 +89,20 @@ aside {
 	font-size: 10px;
 	padding: 2px 6px;
 	border-radius: 4px;
-	background-color: #eee;
+	background-color: #55555537;
 	color: #555;
 	margin-top: 5px;
 	display: inline-block;
 }
 
-.status-closed {
-	background-color: #e0e0e0;
+.status-active {
+	background-color: #fff3cd;
+	color: #856404;
+}
+
+.status-inProgress {
+	background-color: #edd4d4;
+	color: #571515;
 }
 .status-verified {
 	background-color: #d4edda;
@@ -210,12 +216,20 @@ a:visited {
 	color: var(--gray-text);
 }
 
-/* --- LIVE STATUS SECTION (Feature Immaginata) --- */
+/* ==========================================================================
+   --- LIVE STATUS SECTION E POPUP --- 
+   ========================================================================== */
 .live-section {
 	background-color: var(--white);
 	padding: 30px;
 	border-radius: 12px;
 	box-shadow: var(--shadow);
+	margin-top: 40px;
+}
+
+#activeMeetingPopup {
+	flex-direction: column;
+	border-left: 5px solid var(--tv-green);
 }
 
 .section-header {
@@ -255,6 +269,87 @@ a:visited {
 	}
 }
 
+/* Elementi interni del Pop-up */
+.popup-title-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--tv-green);
+	font-size: 20px;
+}
+
+.popup-description {
+	margin-bottom: 20px;
+	color: var(--gray-text);
+}
+
+.meeting-info-box {
+	background-color: var(--gray-light);
+	padding: 15px;
+	border-radius: 8px;
+	border: 1px solid #e0e0e0;
+	margin-bottom: 20px;
+}
+
+.meeting-info-box p {
+	margin-bottom: 8px;
+}
+
+.meeting-info-box p:last-child {
+	margin-bottom: 0;
+}
+
+.popup-actions {
+	display: flex;
+	gap: 15px;
+}
+
+/* Bottoni primari e secondari */
+.btn,
+.btn-primary,
+.btn-outline {
+	padding: 10px 20px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-weight: 600;
+	transition: all 0.2s;
+	font-family: inherit;
+	font-size: 14px;
+}
+
+.btn {
+	background-color: var(--tv-green);
+	color: var(--white);
+	border: none;
+}
+
+.btn:hover {
+	background-color: var(--tv-green-dark);
+}
+
+/* Sovrascriviamo lo stile del bottone primario per farlo nero come in member_dashboard */
+.btn-primary {
+	background-color: var(--black);
+	color: var(--white);
+	border: none;
+}
+
+.btn-primary:hover {
+	background-color: #333333;
+	transform: translateY(-2px);
+}
+
+/* Stile per il bottone secondario "Nascondi / Più tardi" */
+.btn-outline {
+	background-color: transparent;
+	color: var(--black);
+	border: 1px solid #ccc;
+}
+
+.btn-outline:hover {
+	background-color: #f0f0f0;
+}
+
 /* Statistiche semplici */
 .stats-row {
 	display: flex;
@@ -274,27 +369,11 @@ a:visited {
 	color: var(--black);
 }
 
-/* Bottone primario */
-.btn {
-	background-color: var(--tv-green);
-	color: var(--white);
-	border: none;
-	padding: 10px 20px;
-	border-radius: 6px;
-	cursor: pointer;
-	font-weight: 500;
-	transition: background 0.2s;
-}
-
-.btn:hover {
-	background-color: var(--tv-green-dark);
-}
-
 /* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
 @media (max-width: 768px) {
 	body {
 		flex-direction: column;
-		overflow: auto; /* Riabilita lo scroll generale */
+		overflow: auto;
 	}
 	aside {
 		width: 100%;
@@ -331,5 +410,13 @@ a:visited {
 	.stats-row {
 		flex-direction: column;
 		gap: 15px;
+	}
+	.popup-actions {
+		flex-direction: column;
+	}
+	.section-header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 10px;
 	}
 }

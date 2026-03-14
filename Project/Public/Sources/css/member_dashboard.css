@@ -130,8 +130,14 @@ main {
 	display: inline-block;
 }
 
-.status-closed {
-	background-color: #e0e0e0;
+.status-active {
+	background-color: #fff3cd;
+	color: #856404;
+}
+
+.status-inProgress {
+	background-color: #edd4d4;
+	color: #571515;
 }
 .status-verified {
 	background-color: #d4edda;

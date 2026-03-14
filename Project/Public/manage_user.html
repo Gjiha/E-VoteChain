@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Utenti - E-Vote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="Sources/css/ceo_dashboard.css">
+    <link rel="stylesheet" href="Sources/css/audit_report.css">
+
+    <link rel="stylesheet" href="Sources/css/manage_users.css">
+    <script defer src="Sources/js/manage_users.js"></script>
+</head>
+
+<body>
+
+    <aside>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            UniTorV E-Vote
+        </div>
+        <div class="history-title">Menu</div>
+        <ul class="history-list">
+            <li class="history-item" onclick="window.location.href='ceo_dashboard.html'">Torna alla Dashboard</li>
+            <li class="history-item" onclick="handleLogout()">Logout</li>
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <a href="ceo_dashboard.html" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Torna alla Dashboard
+            </a>
+            <div class="user-profile">
+                <span id="userNameHeader">Caricamento...</span>
+                <div class="avatar" id="userInitials">--</div>
+            </div>
+        </header>
+
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
+            <div>
+                <h1>Gestione <span>Utenti</span></h1>
+                <p style="color: var(--gray-text); margin-top: 5px;">Anagrafica completa degli utenti registrati e
+                    permessi di sistema.</p>
+            </div>
+            <div class="stats-badge" id="totalUsersCount">Caricamento...</div>
+        </div>
+
+        <div class="table-container">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Nome e Cognome</th>
+                        <th>Email</th>
+                        <th>Wallet ID</th>
+                        <th>Ruolo</th>
+                        <th>Stato</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                    <tr>
+                        <td colspan="5" class="loading-cell">Caricamento utenti in corso dal database...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+
+</html>

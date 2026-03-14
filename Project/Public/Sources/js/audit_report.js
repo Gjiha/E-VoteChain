@@ -1,27 +1,35 @@
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Setup Utente (Header) e recupero Ruolo/Email
+	// 1. Setup Utente (Header), recupero Ruolo/Email e TOKEN
 	const userString = localStorage.getItem("user");
+	const token = localStorage.getItem("token"); // <-- Recupero del JWT
+
 	let userEmail = null;
 	let userRole = null;
 
-	if (userString) {
-		const user = JSON.parse(userString);
-		userEmail = user.email;
-		userRole = user.ruolo || user.role; // Assumendo che il ruolo sia salvato qui
-
-		document.getElementById("userNameHeader").innerText =
-			user.nome + " " + user.cognome;
-		document.getElementById("userInitials").innerText = (
-			user.nome[0] + user.cognome[0]
-		).toUpperCase();
-	} else {
+	// Se manca l'utente o il token, rimandiamo subito al login
+	if (!userString || !token) {
 		window.location.href = "login.html";
 		return;
 	}
 
-	const isCEO = userRole && userRole.toUpperCase() === "CEO";
+	const user = JSON.parse(userString);
+	userEmail = user.email;
+	userRole = user.ruolo || user.classe || "";
 
-	// Aggiorniamo dinamicamente i tasti "Torna alla dashboard" per evitare vicoli ciechi
+	document.getElementById("userNameHeader").innerText =
+		user.nome + " " + user.cognome;
+	document.getElementById("userInitials").innerText = (
+		user.nome[0] + user.cognome[0]
+	).toUpperCase();
+
+	// CONTROLLO RUOLO ROBUSTO
+	const roleString = String(userRole).toUpperCase().trim();
+	const isCEO = roleString === "CEO";
+
+	console.log("Ruolo rilevato nel localStorage:", roleString);
+	console.log("L'utente è identificato come CEO?", isCEO);
+
+	// Aggiorniamo dinamicamente i tasti "Torna alla dashboard"
 	const dashboardLink = isCEO
 		? "ceo_dashboard.html"
 		: "member_dashboard.html";
@@ -36,8 +44,8 @@ document.addEventListener("DOMContentLoaded", () => {
 			`window.location.href='${dashboardLink}'`,
 		);
 
-	// 2. Avvia il recupero di tutte le riunioni passando i parametri
-	fetchAllMeetingHistory(userEmail, isCEO);
+	// 2. Avvia il recupero passando l'email, il flag CEO e IL TOKEN
+	fetchAllMeetingHistory(userEmail, isCEO, token);
 });
 
 // Funzione di supporto per formattare la data
@@ -51,14 +59,13 @@ function formatItalianDate(date) {
 	});
 }
 
-// Dizionario globale per mappare gli ID alle riunioni ed evitare problemi con gli apici nell'HTML
+// Dizionario globale per mappare gli ID
 window.meetingsMap = {};
 
 // Funzione richiamata al click del bottone nella tabella
 window.vaiADettaglioRiunione = function (meetingId) {
 	const meetingData = window.meetingsMap[meetingId];
 	if (meetingData) {
-		// Salviamo l'INTERO oggetto riunione nel localStorage per passarlo a meeting.html
 		localStorage.setItem("currentMeeting", JSON.stringify(meetingData));
 		window.location.href = "meeting.html";
 	} else {
@@ -66,84 +73,35 @@ window.vaiADettaglioRiunione = function (meetingId) {
 	}
 };
 
-async function fetchAllMeetingHistory(userEmail, isCEO) {
+async function fetchAllMeetingHistory(userEmail, isCEO, token) {
 	const tableBody = document.getElementById("auditTableBody");
-	const TARGET_CLASS = "Reunion";
 	const SERVER_URL = "http://localhost:30000";
 
 	try {
-		const keysResponse = await fetch(
-			`${SERVER_URL}/api/v1/getKeysCopy?class=${TARGET_CLASS}`,
-		);
+		// --- CHIAMATA UNICA ALLA NUOVA ROTTA CON IL JWT ---
+		const response = await fetch(`${SERVER_URL}/api/v1/meetings`, {
+			method: "GET",
+			headers: {
+				Authorization: `Bearer ${token}`,
+			},
+		});
 
-		if (!keysResponse.ok) {
-			throw new Error(`Errore recupero chiavi: ${keysResponse.status}`);
-		}
-
-		const keysJson = await keysResponse.json();
-		const rawKeys = keysJson.data?.keys || [];
-
-		const validKeys = rawKeys
-			.map((k) => k[0])
-			.filter((k) => k && k.startsWith("reunion_"));
-
-		if (validKeys.length === 0) {
-			tableBody.innerHTML =
-				'<tr><td colspan="5" style="text-align:center;">Nessuna riunione in archivio.</td></tr>';
+		// Gestione token scaduto o non valido
+		if (response.status === 401 || response.status === 403) {
+			alert("Sessione scaduta. Effettua nuovamente il login.");
+			localStorage.clear();
+			window.location.href = "login.html";
 			return;
 		}
 
-		const meetingPromises = validKeys.map(async (key) => {
-			try {
-				const kvResponse = await fetch(
-					`${SERVER_URL}/api/v1/getKv?class=${TARGET_CLASS}&key=${key}`,
-				);
-				if (!kvResponse.ok) return null;
+		if (!response.ok) {
+			throw new Error(`Errore recupero dati: ${response.status}`);
+		}
 
-				const kvJson = await kvResponse.json();
-				let meetingData = kvJson.data?.value || kvJson.answer?.value;
+		const responseJson = await response.json();
+		const meetings = responseJson.data || [];
 
-				if (typeof meetingData === "string") {
-					try {
-						meetingData = JSON.parse(meetingData);
-					} catch (e) {
-						console.warn("Impossibile parsare JSON per", key);
-						return null; // Aggiunto per evitare errori bloccanti
-					}
-				}
-
-				// --- CONTROLLO FILTRO: RUOLO E EMAIL ---
-				const partecipanti = meetingData?.partecipanti || [];
-				const isUserParticipant =
-					Array.isArray(partecipanti) &&
-					partecipanti.includes(userEmail);
-
-				// Mostriamo la riunione solo se sei CEO oppure se sei presente nei partecipanti
-				if (isCEO || isUserParticipant) {
-					meetingData.id = key;
-					meetingData.timestamp = parseInt(
-						key.replace("reunion_", ""),
-						10,
-					);
-					return meetingData;
-				} else {
-					return null; // Ignoriamo la riunione
-				}
-			} catch (err) {
-				console.error(
-					`Errore recupero dati per la chiave ${key}:`,
-					err,
-				);
-				return null;
-			}
-		});
-
-		let meetings = await Promise.all(meetingPromises);
-		meetings = meetings.filter((m) => m !== null);
-
-		// Ordiniamo dalla più recente alla più vecchia
-		meetings.sort((a, b) => b.timestamp - a.timestamp);
-
+		// --- FINE CHIAMATA, INIZIO RENDER TABELLA ---
 		tableBody.innerHTML = "";
 
 		if (meetings.length === 0) {
@@ -166,20 +124,20 @@ async function fetchAllMeetingHistory(userEmail, isCEO) {
 				? meeting.partecipanti.length
 				: 0;
 
-			let badgeClass = "status-closed";
-			let badgeText = "Archiviata";
+			let badgeClass = "status-verified";
+			let badgeText = "Conclusa & Verificata";
 
-			const hasVerbale = meeting.verbale && meeting.verbale.trim() !== "";
-
-			if (hasVerbale) {
-				badgeClass = "status-verified";
-				badgeText = "Conclusa & Verificata";
-			} else if (meeting.dataFine) {
+			if (meeting.dataFine) {
 				const now = new Date();
 				const dataFine = new Date(meeting.dataFine);
-				if (dataFine > now) {
+				const dataInizio = new Date(meeting.dataInizio);
+
+				if (dataFine > now && dataInizio < now) {
+					badgeClass = "status-inProgress";
+					badgeText = "In Corso";
+				} else if (dataFine > now && dataInizio > now) {
 					badgeClass = "status-active";
-					badgeText = "Programmata / In Corso";
+					badgeText = "Programmata";
 				}
 			}
 

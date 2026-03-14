@@ -67,7 +67,7 @@
                 </div>
             </a>
 
-            <div class="card card-action">
+            <a class="card card-action" href="manage_user.html">
                 <div class="icon-large">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -80,7 +80,9 @@
                     <h3>Gestione Votanti</h3>
                     <p>Accredita nuovi soci, gestisci deleghe e permessi di voto.</p>
                 </div>
-            </div>
+            </a>
+
+
             <a class="card card-settings" href="audit_report.html">
                 <div class="icon-large" style="color: var(--black);">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -98,32 +100,39 @@
             </a>
         </div>
 
-        <section class="live-section">
+        <section class="live-section" id="activeMeetingPopup" style="display: none;">
+
             <div class="section-header">
-                <h2>Stato Attuale del Sistema</h2>
+                <h2 class="popup-title-header">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    Riunione in Corso Rilevata
+                </h2>
                 <div class="live-indicator">
                     <div class="dot"></div>
-                    SISTEMA ONLINE
+                    IN CORSO
                 </div>
             </div>
-            <p>Nessuna votazione attiva al momento. Il prossimo evento pianificato è tra 3 giorni.</p>
 
-            <div class="stats-row">
-                <div class="stat-item">
-                    <h4>Votanti Attivi</h4>
-                    <div class="number">1,240</div>
-                </div>
-                <div class="stat-item">
-                    <h4>Votazioni 2026</h4>
-                    <div class="number">3</div>
-                </div>
-                <div class="stat-item">
-                    <h4>Affluenza Media</h4>
-                    <div class="number">88%</div>
-                </div>
+            <p class="popup-description">
+                Hai una riunione straordinaria attualmente aperta sulla Blockchain.
+            </p>
+
+            <div class="meeting-info-box">
+                <p><strong>Oggetto:</strong> <span id="popup-title">---</span></p>
+                <p><strong>Data:</strong> <span id="popup-date">---</span></p>
+                <p><strong>ID Meeting:</strong> <span id="popup-id">---</span></p>
             </div>
+
+            <div class="popup-actions">
+                <button class="btn-primary">Accedi alla Stanza</button>
+                <button class="btn-outline" onclick="closePopup()">Nascondi</button>
+            </div>
+
         </section>
-
 
     </main>
 

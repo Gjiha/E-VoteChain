@@ -48,6 +48,7 @@ router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
 			const payload = {
 				id_wallet: utente.id_wallet,
 				classe: utente.classe,
+				email: utente.email,
 			};
 
 			const newToken = jwt.sign(payload, JWT_SECRET, {
