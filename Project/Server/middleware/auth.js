@@ -35,6 +35,7 @@ const verifyToken = (req, res, next) => {
  */
 const isCeoOrAdmin = (req, res, next) => {
 	// Assicuriamoci che verifyToken sia stato eseguito prima
+
 	if (!req.user || !req.user.classe) {
 		return res
 			.status(403)

@@ -9,6 +9,8 @@ const mappingRoutes = require("./routes/route_mapping");
 const fileRoutes = require("./routes/route_files.js");
 const meetingRoutes = require("./routes/meetings_route.js");
 const usersRoutes = require("./routes/users_route.js");
+const roleRoutes = require("./routes/role_route.js");
+const votationRoute = require("./routes/votation_route.js");
 const pool = require("./database/database.js");
 
 const app = express();
@@ -22,6 +24,8 @@ app.use("/api/v1/", meetingRoutes);
 app.use("/api/v1/", mappingRoutes);
 app.use("/api/v1/", fileRoutes);
 app.use("/api/v1/", dbRoutes);
+app.use("/api/v1/", roleRoutes);
+app.use("/api/v1/", votationRoute);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

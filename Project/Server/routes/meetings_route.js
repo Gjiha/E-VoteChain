@@ -12,10 +12,7 @@ router.get("/meetings", verifyToken, async (req, res) => {
 		const userEmail = req.user.email;
 		const userRole = String(req.user.classe).toUpperCase().trim();
 
-		const isCEO =
-			userRole === "CEO" ||
-			userRole.includes("ADMIN") ||
-			userRole.includes("AMMINISTRATORE");
+		const isCEO = userRole === "CEO";
 
 		if (!userEmail && !isCEO) {
 			return res
@@ -92,7 +89,6 @@ router.get("/meetings", verifyToken, async (req, res) => {
 // =========================================================
 // NUOVA ROTTA: Crea una riunione (SOLO PER CEO/ADMIN)
 // =========================================================
-// 2. APPLICHIAMO ENTRAMBI I MIDDLEWARE NELLA DEFINIZIONE DELLA ROTTA
 router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 	try {
 		const { meetingKey, meetingData } = req.body;
@@ -103,7 +99,7 @@ router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 				.json({ message: "Dati della riunione mancanti." });
 		}
 
-		// 3. Il server, dopo aver verificato che l'utente è CEO, fa la chiamata interna ad addKv
+		// 1. Salvataggio della classe "Reunion"
 		const addRes = await fetch(`${LOCAL_API_URL}/addKv`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
@@ -118,10 +114,36 @@ router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 			throw new Error(`Errore API addKv: ${addRes.status}`);
 		}
 
+		// 2. Estrapoliamo il numero di votazioni
+		const numeroVotazioni = parseInt(meetingData.numeroVotazioni, 10) || 0;
+
+		// Costruiamo l'oggetto in cui per ogni i (da 1 a numeroVotazioni) settiamo a false
+		const statiVotazioni = {};
+		for (let i = 1; i <= numeroVotazioni; i++) {
+			statiVotazioni[i] = false;
+		}
+
+		// 3. Salvataggio della classe "Votation" per gestire gli stati delle votazioni
+		const addVotationRes = await fetch(`${LOCAL_API_URL}/addKv`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				class: "Votation",
+				key: [meetingKey, "status"], // Array contenente id_reunion e "status"
+				value: JSON.stringify(statiVotazioni),
+			}),
+		});
+
+		if (!addVotationRes.ok) {
+			throw new Error(
+				`Errore API addKv (Votation): ${addVotationRes.status}`,
+			);
+		}
+
 		const addJson = await addRes.json();
 
 		return res.status(200).json({
-			message: "Riunione creata con successo!",
+			message: "Riunione e votazioni create con successo!",
 			data: addJson,
 		});
 	} catch (err) {
