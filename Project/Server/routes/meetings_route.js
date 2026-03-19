@@ -2,16 +2,12 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken, isCeoOrAdmin } = require("../middleware/auth.js");
 
-// Definiamo l'URL base delle tue API locali
-// Assicurati che la porta corrisponda a quella su cui gira il tuo server
-const LOCAL_API_URL = "http://localhost:30000/api/v1";
+const { getKeysCopy, getKV, addKV } = require("../mapping/mapping.js");
 
 router.get("/meetings", verifyToken, async (req, res) => {
 	try {
-		// 1. Estraiamo i dati dell'utente dal JWT (grazie al middleware)
 		const userEmail = req.user.email;
 		const userRole = String(req.user.classe).toUpperCase().trim();
-
 		const isCEO = userRole === "CEO";
 
 		if (!userEmail && !isCEO) {
@@ -20,62 +16,49 @@ router.get("/meetings", verifyToken, async (req, res) => {
 				.json({ message: "Email utente mancante nel token" });
 		}
 
-		// 2. CHIAMIAMO LA TUA API /getKeysCopy TRAMITE FETCH LATO SERVER
-		const keysResponse = await fetch(
-			`${LOCAL_API_URL}/getKeysCopy?class=Reunion`,
-		);
-		if (!keysResponse.ok) {
-			throw new Error(`Errore API getKeysCopy: ${keysResponse.status}`);
-		}
+		// 1. Chiamiamo direttamente la funzione getKeysCopy
+		const keysAnswer = await getKeysCopy("Reunion");
 
-		const keysJson = await keysResponse.json();
-		// L'API risponde con { message: "ok", data: result }
-		const rawKeys = keysJson.data?.keys || [];
-
+		const rawKeys = keysAnswer?.keys || [];
 		const validKeys = rawKeys
 			.map((k) => k[0])
 			.filter((k) => k && k.startsWith("reunion_"));
 
 		const userMeetings = [];
 
-		// 3. CHIAMIAMO LA TUA API /getKv PER OGNI CHIAVE
+		// 2. Chiamiamo direttamente getKV per ogni chiave
 		for (const key of validKeys) {
-			const kvResponse = await fetch(
-				`${LOCAL_API_URL}/getKv?class=Reunion&key=${key}`,
-			);
-			if (!kvResponse.ok) continue; // Se fallisce una singola fetch, salta al prossimo
+			try {
+				const kvAnswer = await getKV("Reunion", key);
+				let meetingData = kvAnswer?.value;
 
-			const kvJson = await kvResponse.json();
-			let meetingData = kvJson.data?.value || kvJson.answer?.value;
-
-			if (typeof meetingData === "string") {
-				try {
-					meetingData = JSON.parse(meetingData);
-				} catch (e) {
-					continue; // Salta i JSON corrotti
+				if (typeof meetingData === "string") {
+					try {
+						meetingData = JSON.parse(meetingData);
+					} catch (e) {
+						continue;
+					}
 				}
-			}
 
-			if (!meetingData || typeof meetingData !== "object") continue;
+				if (!meetingData || typeof meetingData !== "object") continue;
 
-			// 4. Filtriamo i dati LATO SERVER
-			const partecipanti = meetingData.partecipanti || [];
+				const partecipanti = meetingData.partecipanti || [];
 
-			if (isCEO || partecipanti.includes(userEmail)) {
-				// L'utente ha il diritto di vedere questa riunione
-				meetingData.id = key;
-				meetingData.timestamp = parseInt(
-					key.replace("reunion_", ""),
-					10,
-				);
-				userMeetings.push(meetingData);
+				if (isCEO || partecipanti.includes(userEmail)) {
+					meetingData.id = key;
+					meetingData.timestamp = parseInt(
+						key.replace("reunion_", ""),
+						10,
+					);
+					userMeetings.push(meetingData);
+				}
+			} catch (e) {
+				continue; // Salta se c'è un errore su una singola riunione
 			}
 		}
 
-		// 5. Ordiniamo dalla più recente alla più vecchia
 		userMeetings.sort((a, b) => b.timestamp - a.timestamp);
 
-		// 6. Restituiamo il pacchetto già pronto e filtrato al frontend!
 		return res.status(200).json({
 			message: "ok",
 			data: userMeetings,
@@ -99,48 +82,25 @@ router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 				.json({ message: "Dati della riunione mancanti." });
 		}
 
-		// 1. Salvataggio della classe "Reunion"
-		const addRes = await fetch(`${LOCAL_API_URL}/addKv`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				class: "Reunion",
-				key: meetingKey,
-				value: JSON.stringify(meetingData),
-			}),
-		});
+		// 1. Salvataggio diretto tramite addKV
+		const addJson = await addKV(
+			"Reunion",
+			meetingKey,
+			JSON.stringify(meetingData),
+		);
 
-		if (!addRes.ok) {
-			throw new Error(`Errore API addKv: ${addRes.status}`);
-		}
-
-		// 2. Estrapoliamo il numero di votazioni
 		const numeroVotazioni = parseInt(meetingData.numeroVotazioni, 10) || 0;
-
-		// Costruiamo l'oggetto in cui per ogni i (da 1 a numeroVotazioni) settiamo a false
 		const statiVotazioni = {};
 		for (let i = 1; i <= numeroVotazioni; i++) {
 			statiVotazioni[i] = false;
 		}
 
-		// 3. Salvataggio della classe "Votation" per gestire gli stati delle votazioni
-		const addVotationRes = await fetch(`${LOCAL_API_URL}/addKv`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({
-				class: "Votation",
-				key: [meetingKey, "status"], // Array contenente id_reunion e "status"
-				value: JSON.stringify(statiVotazioni),
-			}),
-		});
-
-		if (!addVotationRes.ok) {
-			throw new Error(
-				`Errore API addKv (Votation): ${addVotationRes.status}`,
-			);
-		}
-
-		const addJson = await addRes.json();
+		// 2. Salvataggio della classe "Votation" diretto
+		const addVotationJson = await addKV(
+			"Votation",
+			[meetingKey, "status"],
+			JSON.stringify(statiVotazioni),
+		);
 
 		return res.status(200).json({
 			message: "Riunione e votazioni create con successo!",

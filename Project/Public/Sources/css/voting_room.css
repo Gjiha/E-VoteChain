@@ -1,0 +1,193 @@
+/* --- VARIABILI COLORI (Palette Tor Vergata) --- */
+:root {
+	--tv-green: #006747;
+	--tv-green-dark: #004d35;
+	--white: #ffffff;
+	--black: #1a1a1a;
+	--gray-light: #f4f6f8;
+	--gray-text: #666666;
+	--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: "Roboto", sans-serif;
+}
+
+body {
+	background-color: var(--gray-light);
+	color: var(--black);
+	display: flex;
+	height: 100vh;
+}
+
+/* --- LAYOUT SEMPLIFICATO --- */
+main {
+	flex: 1;
+	padding: 40px;
+	max-width: 900px;
+	margin: 0 auto;
+	overflow-y: auto;
+}
+
+.header-nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 30px;
+}
+
+.back-btn {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+	color: var(--tv-green);
+	font-weight: 500;
+	transition: opacity 0.2s;
+}
+
+.back-btn:hover {
+	opacity: 0.8;
+}
+
+.wallet-info {
+	font-family: monospace;
+	font-size: 13px;
+	color: var(--gray-text);
+	background-color: #e2e3e5;
+	padding: 6px 12px;
+	border-radius: 6px;
+	border: 1px solid #d6d8db;
+}
+
+/* --- CARD VOTAZIONE --- */
+.voting-card {
+	background: var(--white);
+	padding: 40px;
+	border-radius: 12px;
+	box-shadow: var(--shadow);
+	border-top: 6px solid var(--tv-green);
+}
+
+.voting-card h1 {
+	font-size: 28px;
+	margin-bottom: 15px;
+	color: var(--black);
+}
+
+.meta-info {
+	color: var(--gray-text);
+	font-size: 14px;
+	margin-bottom: 30px;
+	display: flex;
+	gap: 20px;
+	flex-wrap: wrap;
+}
+
+/* --- DOCUMENTAZIONE --- */
+.doc-box {
+	background: var(--gray-light);
+	padding: 20px;
+	border-radius: 8px;
+	margin-bottom: 30px;
+	border: 1px dashed #ccc;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.btn-download {
+	padding: 8px 15px;
+	cursor: pointer;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	background-color: var(--white);
+	color: var(--black);
+	text-decoration: none;
+	font-weight: 500;
+	font-size: 13px;
+	transition: background-color 0.2s;
+}
+
+.btn-download:hover {
+	background-color: #e0e0e0;
+}
+
+/* --- OPZIONI DI VOTO --- */
+.vote-options {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 20px;
+	margin-bottom: 30px;
+}
+
+.vote-btn {
+	padding: 20px;
+	border: 2px solid #e0e0e0;
+	border-radius: 8px;
+	background: var(--white);
+	color: var(--black);
+	font-size: 18px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: all 0.2s;
+	text-align: center;
+}
+
+.vote-btn:hover {
+	border-color: var(--tv-green);
+	background: #f0f9f5;
+}
+
+.vote-btn.selected {
+	border-color: var(--tv-green);
+	background: var(--tv-green);
+	color: var(--white);
+	transform: translateY(-2px);
+	box-shadow: 0 4px 8px rgba(0, 103, 71, 0.2);
+}
+
+/* --- BOTTONE SUBMIT --- */
+.submit-btn {
+	width: 100%;
+	padding: 18px;
+	background: var(--tv-green);
+	color: var(--white);
+	border: none;
+	border-radius: 8px;
+	font-size: 18px;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+	background: var(--tv-green-dark);
+}
+
+.submit-btn:disabled {
+	background: #ccc;
+	cursor: not-allowed;
+}
+
+.status-message {
+	margin-top: 15px;
+	text-align: center;
+	font-weight: 500;
+	font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+	.voting-card {
+		padding: 20px;
+	}
+	.doc-box {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+	}
+}

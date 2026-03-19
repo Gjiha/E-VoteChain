@@ -183,7 +183,7 @@ function showActiveMeetingPopup(meeting) {
 	if (btnPartecipa) {
 		btnPartecipa.removeAttribute("onclick");
 		btnPartecipa.onclick = () => {
-			window.location.href = `voting_room.html?id=${meeting.id}`;
+			window.vaiADettaglioRiunione(meeting.id);
 		};
 	}
 

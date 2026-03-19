@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleware/auth.js");
 
-const LOCAL_API_URL = "http://localhost:30000/api/v1";
-
 router.get("/check-role", verifyToken, (req, res) => {
 	try {
 		// Il middleware verifyToken ha già validato il JWT e salvato i dati in req.user

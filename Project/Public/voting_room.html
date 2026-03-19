@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stanza di Voto - E-vote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/css/voting_room.css">
+    <script defer src="Sources/js/voting_room.js"></script>
+</head>
+
+<body>
+    <main>
+        <div class="header-nav">
+            <a href="javascript:history.go(-1)" class="back-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Torna ai dettagli
+            </a>
+            <div class="wallet-info">Wallet: <span id="userWalletDisplay">Caricamento...</span></div>
+        </div>
+
+        <div class="voting-card">
+            <h1 id="roomTitle">Caricamento Votazione...</h1>
+            <div class="meta-info">
+                <span><strong>Assemblea:</strong> <span id="roomMeetingTitle">--</span></span>
+                <span><strong>Votazione N°:</strong> <span id="roomVoteNumber">--</span></span>
+                <span><strong>Scadenza:</strong> <span id="roomEndDate">--</span></span>
+            </div>
+
+            <div class="doc-box" id="roomDocBox" style="display: none;">
+                <div>
+                    <strong>Documentazione Allegata</strong><br>
+                    <span style="font-size: 13px; color: var(--gray-text);">Verbale di assemblea di riferimento</span>
+                </div>
+                <a href="#" id="roomDocLink" target="_blank" class="btn-download">Scarica / Leggi PDF</a>
+            </div>
+
+            <h3 style="margin-bottom: 20px; color: var(--tv-green); font-size: 18px;">Esprimi la tua preferenza:</h3>
+
+            <div class="vote-options">
+                <button class="vote-btn" id="btn-favorevole">Favorevole</button>
+                <button class="vote-btn" id="btn-contrario">Contrario</button>
+                <button class="vote-btn" id="btn-astenuto">Astenuto</button>
+            </div>
+
+            <button class="submit-btn" id="confirmBtn" disabled>Firma Transazione e Vota</button>
+
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </main>
+</body>
+
+</html>

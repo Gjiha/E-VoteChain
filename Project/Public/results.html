@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risultati Votazione - E-vote</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/css/results.css">
+    <script defer src="Sources/js/results.js"></script>
+</head>
+
+<body>
+    <div class="results-container">
+        <div class="header">
+            <span id="resBadge" class="badge">VOTAZIONE CONCLUSA</span>
+            <h1 id="resTitle">Caricamento in corso...</h1>
+            <p style="color: var(--gray-text); font-size: 14px;">
+                <strong id="resVoteNum">Votazione N° --</strong> | Data chiusura: <span id="resDate">--</span>
+            </p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3 id="resAffluenza">0%</h3>
+                <p>Affluenza Partecipanti</p>
+            </div>
+            <div class="stat-box">
+                <h3 id="resTotalVotes">0</h3>
+                <p>Voti Totali Espressi</p>
+            </div>
+        </div>
+
+        <h3 style="margin-bottom: 5px;">Esito dello Spoglio:</h3>
+        <p id="resEsitoText" style="font-size: 14px; font-weight: 500; margin-bottom: 20px; color: var(--gray-text);">
+            Calcolo in corso...
+        </p>
+
+        <div>
+            <div class="bar-container">
+                <div class="bar-label"><span>Favorevoli</span><span id="textFav">0% (0 voti)</span></div>
+                <div class="bar-bg">
+                    <div id="barFav" class="bar-fill fill-green" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label"><span>Contrari</span><span id="textCon">0% (0 voti)</span></div>
+                <div class="bar-bg">
+                    <div id="barCon" class="bar-fill fill-red" style="width: 0%;"></div>
+                </div>
+            </div>
+            <div class="bar-container">
+                <div class="bar-label"><span>Astenuti</span><span id="textAst">0% (0 voti)</span></div>
+                <div class="bar-bg">
+                    <div id="barAst" class="bar-fill fill-gray" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <a href="#" class="btn-print" onclick="window.print()">Stampa / Scarica PDF Verbale</a>
+        <a href="javascript:history.back()"
+            style="display: block; text-align: center; margin-top: 15px; color: var(--gray-text); text-decoration: none; font-weight: 500;">
+            ← Torna ai dettagli della riunione
+        </a>
+    </div>
+</body>
+
+</html>
