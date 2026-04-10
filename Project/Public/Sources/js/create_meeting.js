@@ -30,33 +30,34 @@ document.addEventListener("DOMContentLoaded", function () {
 			btn.disabled = true;
 			btn.innerText = "Creazione in corso...";
 			status.style.color = "var(--gray-text)";
-			status.innerText = "Upload verbale in corso (Step 1/2)...";
+			status.innerText = "Upload verbale su Blockchain (Step 1/2)...";
 
 			const controller = new AbortController();
-			const timeoutId = setTimeout(() => controller.abort(), 10000);
+			const timeoutId = setTimeout(() => controller.abort(), 15000);
 
 			try {
-				// Creazione della chiave univoca
+				// Creazione della chiave univoca che servirà da ID Riunione e Chiave Blockchain
 				const meetingKey = "reunion_" + Date.now();
 
-				// Upload PDF
-				const file = document.getElementById("verbaleFile").files[0];
-				const fileExtension = file.name.split(".").pop();
+				// Preparazione FormData per l'upload
+				const fileInput = document.getElementById("verbaleFile");
+				if (!fileInput.files.length)
+					throw new Error("Seleziona un file PDF.");
+
+				const file = fileInput.files[0];
 
 				const formData = new FormData();
-				formData.append(
-					"verbale",
-					file,
-					`${meetingKey}.${fileExtension}`,
-				);
+				formData.append("verbale", file); // Il file PDF
+				formData.append("meetingId", meetingKey); // L'ID usato come chiave su Blockchain
 
-				// Consigliato: Inviare il token anche per l'upload del file (se hai protetto la rotta)
+				// Step 1: Upload e salvataggio su Blockchain
 				const uploadRes = await fetch(
 					"http://localhost:30000/api/v1/uploadVerbale",
 					{
 						method: "POST",
 						headers: {
 							Authorization: `Bearer ${token}`,
+							// Nota: Non impostare Content-Type con FormData, lo fa il browser
 						},
 						body: formData,
 						signal: controller.signal,
@@ -67,15 +68,11 @@ document.addEventListener("DOMContentLoaded", function () {
 					const uploadData = await uploadRes.json().catch(() => ({}));
 					throw new Error(
 						uploadData.message ||
-							`Errore HTTP durante l'upload: ${uploadRes.status}`,
+							`Errore durante l'upload: ${uploadRes.status}`,
 					);
 				}
 
-				const uploadData = await uploadRes.json();
-				const filePath = uploadData.path;
-
-				status.innerText =
-					"Salvataggio dati riunione nel database (Step 2/2)...";
+				status.innerText = "Salvataggio dati riunione (Step 2/2)...";
 
 				// Preparazione Dati riunione
 				const partecipantiRaw =
@@ -85,6 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					.map((p) => p.trim())
 					.filter((p) => p !== "");
 
+				// Rimosso il campo 'verbale' (filePath) come richiesto
 				const meetingData = {
 					titolo: document.getElementById("titolo").value,
 					numeroVotazioni: parseInt(
@@ -94,17 +92,16 @@ document.addEventListener("DOMContentLoaded", function () {
 					partecipanti: partecipantiArray,
 					dataInizio: document.getElementById("dataInizio").value,
 					dataFine: document.getElementById("dataFine").value,
-					verbale: filePath,
 				};
 
-				// --- MODIFICA CRUCIALE: Chiamata alla nuova rotta protetta ---
+				// Step 2: Creazione record riunione
 				const addRes = await fetch(
 					"http://localhost:30000/api/v1/create-meeting",
 					{
 						method: "POST",
 						headers: {
 							"Content-Type": "application/json",
-							Authorization: `Bearer ${token}`, // <--- VERIFICA CHI SEI
+							Authorization: `Bearer ${token}`,
 						},
 						signal: controller.signal,
 						body: JSON.stringify({
@@ -114,10 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
 					},
 				);
 
-				// Gestione specifica degli errori di permessi (401/403)
 				if (addRes.status === 401 || addRes.status === 403) {
 					throw new Error(
-						"Accesso Negato: Solo l'amministratore (CEO) può creare nuove riunioni.",
+						"Accesso Negato: Solo l'amministratore può creare riunioni.",
 					);
 				}
 
@@ -125,7 +121,7 @@ document.addEventListener("DOMContentLoaded", function () {
 					const addData = await addRes.json().catch(() => ({}));
 					throw new Error(
 						addData.message ||
-							`Errore HTTP durante il salvataggio: ${addRes.status}`,
+							`Errore durante il salvataggio: ${addRes.status}`,
 					);
 				}
 
@@ -133,23 +129,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
 				// --- SUCCESSO ---
 				status.style.color = "#2e7d32";
-				status.innerText =
-					"Riunione creata con successo! Reindirizzamento...";
+				status.innerText = "Riunione e Verbale creati con successo!";
 				btn.innerText = "Completato ✔";
 				btn.style.background = "#2e7d32";
 
-				window.location.href = "ceo_dashboard.html";
+				setTimeout(() => {
+					window.location.href = "ceo_dashboard.html";
+				}, 1500);
 			} catch (err) {
 				clearTimeout(timeoutId);
 				console.error("Errore di creazione:", err);
 				status.style.color = "red";
 
 				if (err.name === "AbortError") {
-					status.innerText =
-						"Errore: Il server ci sta mettendo troppo tempo (Timeout). Il database potrebbe essere bloccato.";
-				} else if (err.message.includes("Failed to fetch")) {
-					status.innerText =
-						"Errore: Impossibile contattare il server. Verifica che sia acceso.";
+					status.innerText = "Errore: Timeout del server.";
 				} else {
 					status.innerText = "Errore: " + err.message;
 				}
@@ -159,8 +152,6 @@ document.addEventListener("DOMContentLoaded", function () {
 				btn.style.background = "var(--tv-green)";
 			}
 		});
-	} else {
-		console.error("Errore: Form 'meetingForm' non trovato nella pagina!");
 	}
 });
 

@@ -3,7 +3,14 @@ main {
 	margin: 0;
 }
 
-.back-btn {
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 40px;
+}
+
+.btn-back {
 	display: flex;
 	align-items: center;
 	gap: 8px;

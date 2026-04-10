@@ -1,0 +1,278 @@
+{
+	"info": {
+		"name": "App API Collection",
+		"description": "Collezione Postman generata con i payload derivati dalle pagine frontend dell'app.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth / Login",
+			"item": [
+				{
+					"name": "Login Check (con password)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_wallet\": \"0x123abc456def\",\n  \"psw\": \"la_tua_password_qui\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/loginCheck",
+							"host": ["{{base_url}}"],
+							"path": ["loginCheck"]
+						}
+					}
+				},
+				{
+					"name": "Login Check (con token da localStorage)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"id_wallet\": \"0x123abc456def\",\n  \"token\": \"{{token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/loginCheck",
+							"host": ["{{base_url}}"],
+							"path": ["loginCheck"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Role",
+			"item": [
+				{
+					"name": "Check Role",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/check-role",
+							"host": ["{{base_url}}"],
+							"path": ["check-role"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/all-users",
+							"host": ["{{base_url}}"],
+							"path": ["all-users"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Meetings",
+			"item": [
+				{
+					"name": "Get Meetings",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/meetings",
+							"host": ["{{base_url}}"],
+							"path": ["meetings"]
+						}
+					}
+				},
+				{
+					"name": "Create Meeting",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meetingKey\": \"reunion_1710928000000\",\n  \"meetingData\": {\n    \"titolo\": \"Assemblea Ordinaria degli Azionisti\",\n    \"numeroVotazioni\": 3,\n    \"partecipanti\": [\n      \"ceo@azienda.it\",\n      \"socio1@azienda.it\"\n    ],\n    \"dataInizio\": \"2026-03-20T10:00\",\n    \"dataFine\": \"2026-03-20T12:00\",\n    \"verbale\": \"/uploads/verbali/reunion_1710928000000.pdf\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/create-meeting",
+							"host": ["{{base_url}}"],
+							"path": ["create-meeting"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Votations",
+			"item": [
+				{
+					"name": "Get Votations Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/get-votations-status?meetingId=reunion_1710928000000",
+							"host": ["{{base_url}}"],
+							"path": ["get-votations-status"],
+							"query": [
+								{ "key": "meetingId", "value": "reunion_1710928000000" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Aggiorna Status",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meetingId\": \"reunion_1710928000000\",\n  \"votationsStatus\": {\n    \"1\": \"closed\",\n    \"2\": true,\n    \"3\": false\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/aggiorna-status",
+							"host": ["{{base_url}}"],
+							"path": ["aggiorna-status"]
+						}
+					}
+				},
+				{
+					"name": "Add Vote",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meetingId\": \"reunion_1710928000000\",\n  \"voteIndex\": 1,\n  \"voto\": \"favorevole\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/add-vote",
+							"host": ["{{base_url}}"],
+							"path": ["add-vote"]
+						}
+					}
+				},
+				{
+					"name": "Validation Vote",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meetingId\": \"reunion_1710928000000\",\n  \"voteIndex\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/validation-vote",
+							"host": ["{{base_url}}"],
+							"path": ["validation-vote"]
+						}
+					}
+				},
+				{
+					"name": "Visualize Vote",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"meetingId\": \"reunion_1710928000000\",\n  \"voteIndex\": 1\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/visualize-vote",
+							"host": ["{{base_url}}"],
+							"path": ["visualize-vote"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Files",
+			"item": [
+				{
+					"name": "Upload Verbale",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "verbale",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/uploadVerbale",
+							"host": ["{{base_url}}"],
+							"path": ["uploadVerbale"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

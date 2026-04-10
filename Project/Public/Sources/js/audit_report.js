@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 	const dashboardLink = isCEO
 		? "ceo_dashboard.html"
 		: "member_dashboard.html";
-	const backBtn = document.querySelector(".back-btn");
+	const backBtn = document.querySelector(".btn-back");
 	if (backBtn) backBtn.href = dashboardLink;
 	const sidebarDashboardBtn = document.querySelector(
 		".history-item[onclick*='dashboard']",

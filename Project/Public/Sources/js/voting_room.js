@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Setup Utente e Sicurezza base
 	const userString = localStorage.getItem("user");
 	const token = localStorage.getItem("token");
@@ -22,6 +22,40 @@ document.addEventListener("DOMContentLoaded", () => {
 		window.history.back();
 		return;
 	}
+
+	// --- INIZIO CONTROLLO STATO VOTAZIONE ---
+	let votationsStatus = {};
+	try {
+		const statusResponse = await fetch(
+			`http://localhost:30000/api/v1/get-votations-status?meetingId=${meetingId}`,
+			{
+				method: "GET",
+				headers: {
+					Authorization: `Bearer ${token}`,
+				},
+			},
+		);
+
+		if (statusResponse.ok) {
+			const statusJson = await statusResponse.json();
+			votationsStatus = statusJson.data || {};
+		} else {
+			console.warn("Impossibile recuperare lo stato delle votazioni");
+		}
+	} catch (e) {
+		console.error("Errore fetch stato votazioni:", e);
+	}
+
+	// Controllo stringa o booleano a seconda di come il DB salva i dati
+	if (
+		votationsStatus[voteNumber] !== true &&
+		votationsStatus[voteNumber] !== "true"
+	) {
+		alert("Accesso negato: questa votazione non è accessibile.");
+		window.history.back();
+		return; // FERMA L'ESECUZIONE DELLO SCRIPT
+	}
+	// --- FINE CONTROLLO STATO VOTAZIONE ---
 
 	// 3. Popolamento Dati Riunione dal LocalStorage
 	const meetingString = localStorage.getItem("currentMeeting");

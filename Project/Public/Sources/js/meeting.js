@@ -1,7 +1,7 @@
 // Rendi le funzioni accessibili globalmente per l'HTML
 window.toggleVote = async function (voteId, nuovoStato) {};
 window.accediVotazione = function (meetingId, voteId) {};
-window.visualizzaRisultati = async function (meetingId, voteId) {}; // NUOVA FUNZIONE
+window.visualizzaRisultati = async function (meetingId, voteId) {};
 
 document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Setup Utente e Token
@@ -20,9 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		user.nome[0] + user.cognome[0]
 	).toUpperCase();
 
-	// =========================================================
 	// 2. VERIFICA RUOLO SICURA TRAMITE SERVER (JWT)
-	// =========================================================
 	let isCEO = false;
 	try {
 		const roleResponse = await fetch(
@@ -88,22 +86,54 @@ document.addEventListener("DOMContentLoaded", async () => {
 	document.getElementById("mParticipantsCount").innerText =
 		meeting.partecipanti ? meeting.partecipanti.length : 0;
 
+	// =========================================================
+	// GESTIONE DOWNLOAD VERBALE DA BLOCKCHAIN
+	// =========================================================
 	const docLink = document.getElementById("mDocLink");
-	if (meeting.verbale) {
-		docLink.href = "http://localhost:30000" + meeting.verbale;
-	} else {
-		docLink.style.display = "none";
-	}
+
+	docLink.addEventListener("click", async (e) => {
+		e.preventDefault(); // Impedisce il comportamento di default del link
+
+		try {
+			// Effettua la fetch alla rotta GET protetta
+			const response = await fetch(
+				`http://localhost:30000/api/v1/getVerbale/${meeting.id}`,
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${token}`,
+					},
+				},
+			);
+
+			if (!response.ok) {
+				const errData = await response.json().catch(() => ({}));
+				throw new Error(
+					errData.message || "Impossibile recuperare il verbale.",
+				);
+			}
+
+			// Riceve i dati binari (PDF) e crea un Blob
+			const blob = await response.blob();
+			const url = window.URL.createObjectURL(blob);
+
+			// Apre il file PDF in una nuova scheda
+			window.open(url, "_blank");
+		} catch (error) {
+			console.error("Errore nel recupero del verbale:", error);
+			alert("Errore: " + error.message);
+		}
+	});
 
 	// =========================================================
-	// Calcolo Status riunione e variabile per blocco comandi CEO
+	// Calcolo Status riunione
 	// =========================================================
 	const now = new Date();
 	const start = new Date(meeting.dataInizio);
 	const end = new Date(meeting.dataFine);
 	const statusBadge = document.getElementById("meetingStatus");
 
-	let isMeetingActive = false; // <-- VARIABILE CHIAVE PER I PERMESSI CEO
+	let isMeetingActive = false;
 
 	if (now < start) {
 		statusBadge.innerText = "Programmata";
@@ -133,9 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		walletListContainer.innerText = "Nessun partecipante inserito.";
 	}
 
-	// =========================================================
 	// 4. RECUPERO STATO VOTAZIONI DAL SERVER
-	// =========================================================
 	let votationsStatus = {};
 	try {
 		const statusResponse = await fetch(
@@ -151,16 +179,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 		if (statusResponse.ok) {
 			const statusJson = await statusResponse.json();
 			votationsStatus = statusJson.data || {};
-		} else {
-			console.warn("Impossibile recuperare lo stato delle votazioni");
 		}
 	} catch (e) {
 		console.error("Errore fetch stato votazioni:", e);
 	}
 
-	// =========================================================
 	// 5. GENERAZIONE LISTA VOTAZIONI E BOTTONI
-	// =========================================================
 	const votesContainer = document.getElementById("mVotesList");
 	votesContainer.innerHTML = "";
 
@@ -198,28 +222,24 @@ document.addEventListener("DOMContentLoaded", async () => {
             `;
 
 			if (isCEO) {
-				// LOGICA CEO
 				if (isAperta) {
 					cardHTML += `<button class="btn btn-outline btn-sm" onclick="accediVotazione('${meeting.id}', ${i})">Accedi</button>`;
 					if (isMeetingActive) {
 						cardHTML += `<button class="btn btn-danger btn-sm" onclick="toggleVote(${i}, 'closed')">Chiudi</button>`;
 					}
 				} else if (isChiusaDefinitiva) {
-					// SE CHIUSA: Bottone per visualizzare i risultati
 					cardHTML += `<button class="btn btn-primary btn-sm" style="background-color: var(--black);" onclick="visualizzaRisultati('${meeting.id}', ${i})">Visualizza risultati</button>`;
 				} else {
 					if (isMeetingActive) {
 						cardHTML += `<button class="btn btn-primary btn-sm" onclick="toggleVote(${i}, true)">Apri Votazione</button>`;
 					} else {
-						cardHTML += `<span class="vote-closed-text">Riunione non attiva (Apertura non consentita)</span>`;
+						cardHTML += `<span class="vote-closed-text">Riunione non attiva</span>`;
 					}
 				}
 			} else {
-				// LOGICA MEMBRO NORMALE
 				if (isAperta) {
 					cardHTML += `<button class="btn btn-primary btn-sm" onclick="accediVotazione('${meeting.id}', ${i})">Accedi alla Votazione</button>`;
 				} else if (isChiusaDefinitiva) {
-					// SE CHIUSA: Bottone per visualizzare i risultati anche per il membro
 					cardHTML += `<button class="btn btn-primary btn-sm" style="background-color: var(--black);" onclick="visualizzaRisultati('${meeting.id}', ${i})">Visualizza risultati</button>`;
 				} else {
 					cardHTML += `<span class="vote-closed-text">Votazione non ancora aperta</span>`;
@@ -255,10 +275,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 			if (!res.ok) throw new Error("Errore API aggiorna-status");
 
 			if (nuovoStato === "closed") {
-				console.log(
-					"Chiusura confermata: Avvio scrutinio sulla blockchain...",
-				);
-
 				const valRes = await fetch(
 					"http://localhost:30000/api/v1/validation-vote",
 					{
@@ -275,26 +291,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 				);
 
 				if (valRes.ok) {
-					// Ora validation-vote non restituisce il JSON dei risultati,
-					// quindi richiamiamo direttamente la fetch di visualizzazione per scaricare i dati
 					await window.visualizzaRisultati(meeting.id, voteId);
-				} else {
-					console.warn(
-						"Errore durante lo scrutinio:",
-						await valRes.text(),
-					);
-					alert(
-						"La votazione è stata chiusa, ma si è verificato un errore durante la generazione del risultato finale.",
-					);
 				}
 			}
 
 			window.location.reload();
 		} catch (err) {
 			console.error(err);
-			alert(
-				"Errore di connessione: Impossibile modificare lo stato della votazione.",
-			);
+			alert("Errore di connessione.");
 			votationsStatus[voteId] = statoPrecedente;
 		}
 	};
@@ -303,7 +307,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 		window.location.href = `voting_room.html?id=${meetingId}&vote=${voteId}`;
 	};
 
-	// --- NUOVA FUNZIONE: Visualizza e Salva Risultati ---
 	window.visualizzaRisultati = async function (meetingId, voteId) {
 		try {
 			const res = await fetch(
@@ -323,27 +326,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			if (!res.ok) {
 				const errorData = await res.json();
-				throw new Error(
-					errorData.message || "Errore nel recupero dei risultati.",
-				);
+				throw new Error(errorData.message || "Errore risultati.");
 			}
 
 			const data = await res.json();
-
-			// Salva nel localStorage l'intero oggetto JSON dei risultati
 			localStorage.setItem("currentVoteResults", JSON.stringify(data));
-
-			// Naviga alla nuova pagina dei risultati
 			window.location.href = `results.html?id=${meetingId}&vote=${voteId}`;
 		} catch (error) {
-			console.error(
-				"Errore durante la visualizzazione dei risultati:",
-				error,
-			);
-			alert(
-				"Attenzione: Impossibile recuperare i risultati della votazione. " +
-					error.message,
-			);
+			console.error("Errore risultati:", error);
+			alert("Attenzione: " + error.message);
 		}
 	};
 

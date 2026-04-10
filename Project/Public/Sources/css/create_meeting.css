@@ -1,24 +1,53 @@
-main {
-	max-width: auto; /* Un po' più largo per i form */
-	margin: 0; /* Rimuoviamo il margin auto perché c'è la sidebar */
+/* --- RESET E VARIABILI (Assicurati che siano definite nel tuo file globale) --- */
+:root {
+	--tv-green: #006747;
+	--tv-green-dark: #004d35;
+	--white: #ffffff;
+	--gray-light: #f5f5f5;
+	--gray-text: #666666;
+	--shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.back-btn {
+/* --- LAYOUT GENERALE --- */
+main {
+	max-width: auto;
+	margin: 0;
+	padding: 40px;
+	width: 100%;
+	box-sizing: border-box; /* Fondamentale per il calcolo dei margini */
+}
+
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 40px;
+	width: 100%;
+}
+
+.btn-back {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	text-decoration: none;
 	color: var(--tv-green);
 	font-weight: 500;
+	transition: opacity 0.2s;
 }
 
+.btn-back:hover {
+	opacity: 0.8;
+}
+
+/* --- CARD E FORM --- */
 .form-card {
-	max-width: 900px;
+	max-width: 950px;
 	background: var(--white);
 	padding: 35px;
 	border-radius: 12px;
 	box-shadow: var(--shadow);
 	border-top: 5px solid var(--tv-green);
+	box-sizing: border-box;
 }
 
 .form-section {
@@ -30,29 +59,40 @@ main {
 	font-size: 16px;
 	color: var(--tv-green);
 	margin-bottom: 20px;
-	border-bottom: 1px solid var(--gray-light);
+	border-bottom: 1px solid #eee;
 	padding-bottom: 10px;
 	text-transform: uppercase;
 	letter-spacing: 1px;
 }
 
+/* Gestione Righe: Risolve l'errore di sovrapposizione dello screenshot */
 .form-row {
 	display: flex;
 	gap: 20px;
+	flex-wrap: wrap; /* Permette di andare a capo se lo spazio finisce */
+	margin-bottom: 20px;
+	margin-top: 10px;
 }
 
 .form-row .form-group {
 	flex: 1;
+	min-width: 250px; /* Impedisce ai campi di diventare troppo stretti */
+}
+
+/* Selettore specifico per campi numerici o piccoli nella riga */
+.form-group-small {
+	flex: 0 0 150px !important;
 }
 
 .form-group label {
 	display: block;
 	font-size: 13px;
 	font-weight: 700;
-	margin: 8px;
+	margin-bottom: 8px;
 	color: var(--gray-text);
 }
 
+/* --- INPUTS --- */
 input[type="text"],
 input[type="number"],
 input[type="datetime-local"],
@@ -63,7 +103,8 @@ textarea {
 	border-radius: 6px;
 	font-size: 15px;
 	background-color: var(--gray-light);
-	transition: border-color 0.2s;
+	transition: all 0.2s;
+	box-sizing: border-box;
 }
 
 input:focus,
@@ -71,144 +112,29 @@ textarea:focus {
 	border-color: var(--tv-green);
 	outline: none;
 	background-color: white;
+	box-shadow: 0 0 0 3px rgba(0, 103, 71, 0.1);
 }
 
-.file-input-wrapper {
-	border: 2px dashed #e0e0e0;
-	padding: 20px;
-	border-radius: 6px;
-	background: #fafafa;
-	text-align: center;
-}
-
-.btn-submit {
-	background: var(--tv-green);
-	color: white;
-	padding: 18px;
-	border: none;
-	border-radius: 8px;
-	font-size: 16px;
-	font-weight: 700;
-	cursor: pointer;
-	width: 100%;
-	box-shadow: 0 4px 12px rgba(0, 103, 71, 0.2);
-	transition: all 0.2s;
-}
-
-.btn-submit:hover {
-	background: var(--tv-green-dark);
-	transform: translateY(-2px);
-}
-
-.status-message {
-	margin-top: 20px;
-	padding: 15px;
-	border-radius: 6px;
-	text-align: center;
-	display: none; /* Mostrato via JS */
-}
-
-/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
-@media (max-width: 768px) {
-	.form-card {
-		padding: 20px;
-	}
-	.form-row {
-		flex-direction: column;
-		gap: 0;
-	}
-	.form-row .form-group {
-		margin-bottom: 15px;
-	}
-	.btn-submit {
-		padding: 15px;
-		font-size: 15px;
-	}
-}
-/* --- STILI SPECIFICI PER IL FORM --- */
-
-main {
-	max-width: auto; /* Un po' più largo per i form */
-	margin: 0; /* Rimuoviamo il margin auto perché c'è la sidebar */
-}
-
-.back-btn {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	text-decoration: none;
-	color: var(--tv-green);
-	font-weight: 500;
-}
-
-.form-card {
-	max-width: 900px;
-	background: var(--white);
-	padding: 35px;
-	border-radius: 12px;
-	box-shadow: var(--shadow);
-	border-top: 5px solid var(--tv-green);
-}
-
-.form-section {
-	margin-bottom: 30px;
-	padding-bottom: 10px;
-}
-
-.form-section h3 {
-	font-size: 16px;
-	color: var(--tv-green);
-	margin-bottom: 20px;
-	border-bottom: 1px solid var(--gray-light);
-	padding-bottom: 10px;
-	text-transform: uppercase;
-	letter-spacing: 1px;
-}
-
-.form-row {
-	display: flex;
-	gap: 20px;
-}
-
-.form-row .form-group {
-	flex: 1;
-}
-
-.form-group label {
-	display: block;
-	font-size: 13px;
-	font-weight: 700;
-	margin: 8px;
-	color: var(--gray-text);
-}
-
-input[type="text"],
-input[type="datetime-local"],
 textarea {
-	width: 100%;
-	padding: 12px;
-	border: 1px solid #e0e0e0;
-	border-radius: 6px;
-	font-size: 15px;
-	background-color: var(--gray-light);
-	transition: border-color 0.2s;
-}
-
-input:focus,
-textarea:focus {
-	border-color: var(--tv-green);
-	outline: none;
-	background-color: white;
+	resize: vertical;
+	min-height: 100px;
 }
 
 .file-input-wrapper {
 	border: 2px dashed #e0e0e0;
-	padding: 20px;
+	padding: 30px;
 	border-radius: 6px;
 	background: #fafafa;
 	text-align: center;
+	cursor: pointer;
+	transition: border-color 0.2s;
 }
 
+.file-input-wrapper:hover {
+	border-color: var(--tv-green);
+}
+
+/* --- BOTTONE SUBMIT --- */
 .btn-submit {
 	background: var(--tv-green);
 	color: white;
@@ -221,6 +147,7 @@ textarea:focus {
 	width: 100%;
 	box-shadow: 0 4px 12px rgba(0, 103, 71, 0.2);
 	transition: all 0.2s;
+	margin-top: 10px;
 }
 
 .btn-submit:hover {
@@ -233,23 +160,36 @@ textarea:focus {
 	padding: 15px;
 	border-radius: 6px;
 	text-align: center;
-	display: none; /* Mostrato via JS */
+	display: none;
 }
 
-/* --- RESPONSIVE DESKTOP-FIRST (MOBILE & TABLET) --- */
+/* --- MEDIA QUERIES (RESPONSIVE) --- */
+
+/* Tablet e Desktop piccoli (Sistemazione per lo screenshot che hai inviato) */
+@media (max-width: 1024px) {
+	main {
+		padding: 20px;
+	}
+
+	.form-row .form-group {
+		min-width: 100%; /* I campi si incolonnano per non rompersi */
+	}
+}
+
+/* Mobile */
 @media (max-width: 768px) {
+	header {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 15px;
+	}
+
 	.form-card {
 		padding: 20px;
 	}
-	.form-row {
-		flex-direction: column;
-		gap: 0;
-	}
-	.form-row .form-group {
-		margin-bottom: 15px;
-	}
-	.btn-submit {
-		padding: 15px;
-		font-size: 15px;
+
+	input,
+	textarea {
+		font-size: 16px; /* Evita lo zoom forzato su mobile */
 	}
 }

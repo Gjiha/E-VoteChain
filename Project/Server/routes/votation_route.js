@@ -251,8 +251,7 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 		// Se l'oggetto non ha "dettagliVoti", significa che la votazione non è stata ancora validata/chiusa
 		if (!dataObj || !dataObj.dettagliVoti) {
 			return res.status(404).json({
-				message:
-					"Risultati non ancora disponibili. La votazione potrebbe essere ancora aperta.",
+				message: "Risultati non disponibili.",
 			});
 		}
 

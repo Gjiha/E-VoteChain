@@ -1,6 +1,13 @@
 /* --- manage_users.css --- */
 /* (Layout e tabella ereditati da ceo_dashboard.css e audit_report.css) */
 
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 40px;
+}
+
 .stats-badge {
 	background-color: var(--tv-green);
 	color: var(--white);
