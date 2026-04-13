@@ -17,9 +17,30 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 				.json({ message: "Parametro meetingId mancante." });
 		}
 
-		// Passiamo direttamente l'array della chiave a getKV!
-		const kvAnswer = await getKV("Votation", [meetingId, "status"]);
+		// 1. Recupero Dati Riunione per controllare le date
+		const reunionAnswer = await getKV("Reunion", meetingId);
+		let meetingData = reunionAnswer?.value;
 
+		if (typeof meetingData === "string") {
+			try {
+				meetingData = JSON.parse(meetingData);
+			} catch (e) {
+				console.error("Errore parsing dati riunione", e);
+			}
+		}
+
+		// Calcolo stato termine riunione
+		const now = new Date();
+		let isMeetingEnded = false;
+		if (meetingData && meetingData.dataFine) {
+			const end = new Date(meetingData.dataFine);
+			if (now > end) {
+				isMeetingEnded = true;
+			}
+		}
+
+		// 2. Recupero stato votazioni attuale
+		const kvAnswer = await getKV("Votation", [meetingId, "status"]);
 		let votationsData = kvAnswer?.value;
 
 		if (typeof votationsData === "string") {
@@ -29,8 +50,105 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 				votationsData = {};
 			}
 		}
-
 		if (!votationsData) votationsData = {};
+
+		// 3. Elaborazione e Chiusura Automatica (se riunione terminata)
+		let hasModifications = false;
+
+		if (isMeetingEnded) {
+			for (const [voteIndex, status] of Object.entries(votationsData)) {
+				// Se è "true" (aperta), eseguiamo la validazione automatica e la chiudiamo
+				if (status === true || status === "true") {
+					// --- INIZIO LOGICA VALIDATION-VOTE ---
+					let historyResult;
+					try {
+						historyResult = await getHistoryKV("Votation", [
+							meetingId,
+							String(voteIndex),
+						]);
+					} catch (err) {
+						historyResult = []; // Nessuno storico trovato
+					}
+
+					let sommaTotale = 0;
+					let countFavorevoli = 0;
+					let countContrari = 0;
+					let countAstenuti = 0;
+
+					if (
+						historyResult &&
+						Array.isArray(historyResult) &&
+						historyResult.length > 0
+					) {
+						for (const record of historyResult) {
+							if (record.isDelete) continue;
+
+							let dataObj;
+							try {
+								dataObj = JSON.parse(record.data);
+							} catch (e) {
+								continue;
+							}
+
+							let innerValue = dataObj.value;
+							if (typeof innerValue === "string") {
+								try {
+									innerValue = JSON.parse(innerValue);
+								} catch (e) {
+									continue;
+								}
+							}
+
+							if (innerValue && innerValue.value !== undefined) {
+								const valoreVoto =
+									parseFloat(innerValue.value) || 0;
+								sommaTotale += valoreVoto;
+
+								if (valoreVoto > 0) countFavorevoli++;
+								else if (valoreVoto < 0) countContrari++;
+								else countAstenuti++;
+							}
+						}
+					}
+
+					const dettagliVotiObj = {
+						favorevoli: countFavorevoli,
+						contrari: countContrari,
+						astenuti: countAstenuti,
+						totaleVotanti:
+							countFavorevoli + countContrari + countAstenuti,
+					};
+
+					const payloadRisultato = {
+						"esito voto": sommaTotale,
+						dettagliVoti: dettagliVotiObj,
+					};
+
+					// Sigilliamo il risultato sulla blockchain per la singola votazione
+					await addKV(
+						"Votation",
+						[meetingId, String(voteIndex)],
+						JSON.stringify(payloadRisultato),
+					);
+					// --- FINE LOGICA VALIDATION-VOTE ---
+
+					// Aggiorniamo lo status a "closed"
+					votationsData[voteIndex] = "closed";
+					hasModifications = true;
+				}
+			}
+		}
+
+		// 4. Salvataggio delle modifiche allo Status in Blockchain
+		if (hasModifications) {
+			await addKV(
+				"Votation",
+				[meetingId, "status"],
+				JSON.stringify(votationsData),
+			);
+		}
+
+		// Ritorno il JSON aggiornato al frontend
 		return res.status(200).json({ message: "ok", data: votationsData });
 	} catch (err) {
 		console.error(err);
