@@ -9,6 +9,15 @@ const storage = multer.memoryStorage();
 const upload = multer({
 	storage: storage,
 	limits: { fileSize: 50 * 1024 * 1024 }, // Limite opzionale di 50MB per il file PDF
+	fileFilter: (req, file, cb) => {
+		// Controlla se il mimetype corrisponde a un PDF
+		if (file.mimetype === "application/pdf") {
+			cb(null, true); // Accetta il file
+		} else {
+			// Rifiuta il file generando un errore
+			cb(new Error("TIPO_FILE_NON_VALIDO"), false);
+		}
+	},
 });
 
 /**

@@ -45,6 +45,18 @@ document.addEventListener("DOMContentLoaded", function () {
 					throw new Error("Seleziona un file PDF.");
 
 				const file = fileInput.files[0];
+				if (file.type !== "application/pdf") {
+					throw new Error(
+						"Formato non valido. Seleziona esclusivamente un file .pdf.",
+					);
+				}
+
+				const maxSizeInBytes = 50 * 1024 * 1024; // 50 MegaBytes
+				if (file.size > maxSizeInBytes) {
+					throw new Error(
+						"Il file è troppo grande. La dimensione massima consentita è di 50MB.",
+					);
+				}
 
 				const formData = new FormData();
 				formData.append("verbale", file); // Il file PDF
