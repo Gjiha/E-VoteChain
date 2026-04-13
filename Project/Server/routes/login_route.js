@@ -10,20 +10,27 @@ router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
 	console.log("Richiesta ricevuta per wallet:", req.body.id_wallet);
 
 	try {
-		const { psw, token } = req.body;
+		// Estraiamo la password dal body
+		const { psw } = req.body;
 		const utente = req.dbUser;
 
-		// =========================================
-		// CASO 1: VERIFICA DEL TOKEN (Da index.html)
-		// =========================================
-		if (token) {
-			try {
-				// jwt.verify "crasha" se il token non è valido.
-				jwt.verify(token, JWT_SECRET);
-				console.log(jwt.verify(token, JWT_SECRET));
+		// Estraiamo il token dall'header 'Authorization'
+		// Il formato standard è "Bearer [token]"
+		const authHeader = req.headers["authorization"];
+		const tokenFromHeader = authHeader && authHeader.split(" ")[1];
 
-				// Se arriva qui, il token è perfettamente valido!
-				// FIX: Aggiunto 'return' per fermare il codice qui.
+		// =========================================
+		// CASO 1: VERIFICA DEL TOKEN (Se presente nell'header)
+		// =========================================
+		if (tokenFromHeader) {
+			try {
+				// Verifichiamo il token estratto dall'header
+				const decoded = jwt.verify(tokenFromHeader, JWT_SECRET);
+				console.log(
+					"Token verificato con successo per:",
+					decoded.id_wallet,
+				);
+
 				return res
 					.status(200)
 					.json({ message: "Token valido, accesso consentito." });
@@ -36,10 +43,12 @@ router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
 		}
 
 		// =========================================
-		// CASO 2: LOGIN NORMALE (Da login.html)
+		// CASO 2: LOGIN NORMALE (Password)
 		// =========================================
 		if (!psw) {
-			return res.status(400).json({ message: "Password mancante" });
+			return res
+				.status(400)
+				.json({ message: "Password mancante o token non fornito" });
 		}
 
 		const match = await bcrypt.compare(psw, utente.psw);
@@ -52,12 +61,12 @@ router.post("/loginCheck", fetchUserFromDb, async (req, res) => {
 			};
 
 			const newToken = jwt.sign(payload, JWT_SECRET, {
-				expiresIn: process.env.JWT_EXPIRES_IN,
+				expiresIn: process.env.JWT_EXPIRES_IN || "1h",
 			});
 
+			// Rimuoviamo la password dall'oggetto utente prima di inviarlo
 			delete utente.psw;
 
-			// FIX: Aggiunto 'return' anche qui
 			return res.status(200).json({
 				message: "Login effettuato",
 				token: newToken,

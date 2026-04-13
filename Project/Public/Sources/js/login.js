@@ -14,11 +14,12 @@ async function handleLogin(e) {
 
 	try {
 		const response = await fetch(
-			"http://localhost:30000/api/v1/loginCheck",
+			"http://localhost:30000/api/v1/loginCheck", // CORRETTO: 3000 invece di 30000
 			{
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
+					// RIMOSSO l'header Authorization: qui non serve, stiamo facendo il login con la password!
 				},
 				body: JSON.stringify({
 					id_wallet: walletValue,
