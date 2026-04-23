@@ -182,30 +182,69 @@ router.post("/aggiorna-status", verifyToken, isCeoOrAdmin, async (req, res) => {
 router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 	try {
 		const { meetingId, voteIndex, voto } = req.body;
+
+		// 1. Estrazione sicura dei dati dal token
 		const userEmail = req.user.email;
+		const userRole = String(req.user.classe).toUpperCase().trim();
+		const isCEO = userRole === "CEO";
 
 		if (!meetingId || !voteIndex || !voto) {
 			return res.status(400).json({
 				message: "Dati mancanti (meetingId, voteIndex, voto).",
 			});
 		}
-		if (!userEmail)
+		if (!userEmail) {
 			return res
 				.status(400)
 				.json({ message: "Email utente mancante nel token." });
+		}
 
+		// 2. CONTROLLO PARTECIPAZIONE: Recupero dati riunione
+		const reunionAnswer = await getKV("Reunion", meetingId);
+		let meetingData = reunionAnswer?.value;
+
+		if (typeof meetingData === "string") {
+			try {
+				meetingData = JSON.parse(meetingData);
+			} catch (e) {
+				console.error("Errore parsing dati riunione", e);
+			}
+		}
+
+		if (!meetingData) {
+			return res
+				.status(404)
+				.json({ message: "Riunione non trovata sulla blockchain." });
+		}
+
+		// 3. Verifichiamo se l'utente è autorizzato (CEO o presente in lista partecipanti)
+		const partecipanti = meetingData.partecipanti || [];
+		if (!isCEO && !partecipanti.includes(userEmail)) {
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei autorizzato a votare in questa riunione.",
+			});
+		}
+
+		// 4. Recupero quota dal database (Logica preesistente)
 		const query = `SELECT quota FROM utenti WHERE email = $1`;
 		const dbResult = await pool.query(query, [userEmail]);
 
 		if (dbResult.rows.length === 0)
-			return res.status(404).json({ message: "Utente non trovato." });
+			return res
+				.status(404)
+				.json({ message: "Utente non trovato nel database." });
+
 		const quota = parseFloat(dbResult.rows[0].quota) || 0;
 
 		let valoreAssegnato = 0;
 		if (voto === "favorevole") valoreAssegnato = quota;
 		else if (voto === "contrario") valoreAssegnato = -quota;
 		else if (voto === "astenuto") valoreAssegnato = 0;
-		else return res.status(400).json({ message: "Voto non valido." });
+		else
+			return res
+				.status(400)
+				.json({ message: "Tipo di voto non valido." });
 
 		const hashedEmail = crypto
 			.createHash("sha256")
@@ -217,7 +256,7 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 			value: valoreAssegnato,
 		};
 
-		// Salvataggio tramite invocazione diretta
+		// 5. Salvataggio del voto in blockchain
 		const addJson = await addKV(
 			"Votation",
 			[meetingId, String(voteIndex)],
@@ -347,18 +386,50 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 	try {
 		const { meetingId, voteIndex } = req.body;
 
+		// 1. Estraiamo in modo sicuro i dati dell'utente dal token
+		const userEmail = req.user.email;
+		const userRole = String(req.user.classe).toUpperCase().trim();
+		const isCEO = userRole === "CEO";
+
 		if (!meetingId || !voteIndex) {
 			return res
 				.status(400)
 				.json({ message: "Dati mancanti (meetingId o voteIndex)." });
 		}
 
-		// Recuperiamo solo l'ultimo valore aggiornato per questa votazione
-		const kvAnswer = await getKV("Votation", [
+		// 2. Recuperiamo la Riunione per controllare la lista dei partecipanti
+		const reunionAnswer = await getKV("Reunion", meetingId);
+		let meetingData = reunionAnswer?.value;
+
+		if (typeof meetingData === "string") {
+			try {
+				meetingData = JSON.parse(meetingData);
+			} catch (e) {
+				console.error("Errore parsing dati riunione", e);
+			}
+		}
+
+		if (!meetingData) {
+			return res.status(404).json({ message: "Riunione non trovata." });
+		}
+
+		// 3. Verifichiamo se l'utente ha il permesso di vedere i risultati
+		// Ha il permesso se è il CEO oppure se la sua email è nell'array partecipanti
+		const partecipanti = meetingData.partecipanti || [];
+		if (!isCEO && !partecipanti.includes(userEmail)) {
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei un partecipante di questa riunione.",
+			});
+		}
+
+		// 4. Recuperiamo solo l'ultimo valore aggiornato per questa votazione
+		// Ho rinominato in `voteAnswer` per evitare conflitti con `reunionAnswer`
+		const voteAnswer = await getKV("Votation", [
 			meetingId,
 			String(voteIndex),
 		]);
-		let dataObj = kvAnswer?.value;
+		let dataObj = voteAnswer?.value;
 
 		if (typeof dataObj === "string") {
 			try {
