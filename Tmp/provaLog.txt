@@ -1,0 +1,1 @@
+[timestamp][ip-sorgente][ip-destinazione][action/route][codice][comment]

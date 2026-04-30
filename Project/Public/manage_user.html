@@ -48,18 +48,25 @@
         </header>
 
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px;">
-            <div>
-                <h1>Gestione <span>Utenti</span></h1>
-                <p style="color: var(--gray-text); margin-top: 5px;">Anagrafica completa degli utenti registrati e
-                    permessi di sistema.</p>
-            </div>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <div class="stats-badge" id="totalUsersCount">Caricamento...</div>
-                <a href="add_user.html" class="btn-submit"
-                    style="padding: 10px 20px; text-decoration: none; font-size: 14px; margin: 0; width: auto; display: inline-block;">+
-                    Aggiungi Utente</a>
-            </div>
+    <div>
+        <h1>Gestione <span>Utenti</span></h1>
+        <p style="color: var(--gray-text); margin-top: 5px;">Anagrafica completa degli utenti registrati e permessi di sistema.</p>
+    </div>
+    <div style="display: flex; gap: 15px; align-items: center;">
+        
+        <!-- NUOVO: Menu a tendina per l'ordinamento -->
+        <select id="sortSelect" style="padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; outline: none; cursor: pointer; font-family: 'Roboto', sans-serif;">
+            <option value="cognome">Ordina per Cognome</option>
+            <option value="nome">Ordina per Nome</option>
+            <option value="email">Ordina per Email</option>
+            <option value="wallet">Ordina per Wallet ID</option>
+            <option value="ruolo">Ordina per Ruolo</option>
+        </select>
+
+        <div class="stats-badge" id="totalUsersCount">Caricamento...</div>
+        <a href="add_user.html" class="btn-submit" style="padding: 10px 20px; text-decoration: none; font-size: 14px; margin: 0; width: auto; display: inline-block;">+ Aggiungi Utente</a>
         </div>
+    </div>
 
         <div class="table-container">
             <table class="audit-table">
