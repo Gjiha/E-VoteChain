@@ -11,7 +11,7 @@ const meetingRoutes = require("./routes/meetings_route.js");
 const usersRoutes = require("./routes/users_route.js");
 const roleRoutes = require("./routes/role_route.js");
 const votationRoute = require("./routes/votation_route.js");
-const pool = require("./database/database.js");
+// const pool = require("./database/database.js");
 
 const app = express();
 

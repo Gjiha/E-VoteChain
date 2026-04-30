@@ -1,11 +1,11 @@
 const express = require("express");
 const crypto = require("crypto");
-const pool = require("../database/database");
+// RIMOSSO: const pool = require("../database/database");
 const router = express.Router();
 const { verifyToken, isCeoOrAdmin } = require("../middleware/auth.js");
 const { checkIfAlreadyVoted } = require("../middleware/check_vote.js");
 
-// IMPORTIAMO LE FUNZIONI
+// IMPORTIAMO LE FUNZIONI DELLA BLOCKCHAIN
 const { getKV, addKV, getHistoryKV } = require("../mapping/mapping.js");
 
 router.get("/get-votations-status", verifyToken, async (req, res) => {
@@ -226,17 +226,48 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 			});
 		}
 
-		// 4. Recupero quota dal database (Logica preesistente)
-		const query = `SELECT quota FROM utenti WHERE email = $1`;
-		const dbResult = await pool.query(query, [userEmail]);
+		// 4. RECUPERO QUOTA DALLA BLOCKCHAIN INVECE CHE DAL DB SQL
+		// a. Otteniamo la tabella per tradurre l'email in id_wallet
+		const tableAnswer = await getKV("User", "table");
+		let emailTable =
+			tableAnswer?.value || tableAnswer?.answer || tableAnswer;
+		if (typeof emailTable === "string") {
+			try {
+				emailTable = JSON.parse(emailTable);
+			} catch (e) {
+				emailTable = {};
+			}
+		}
 
-		if (dbResult.rows.length === 0)
+		const userId = emailTable ? emailTable[userEmail] : null;
+		if (!userId) {
 			return res
 				.status(404)
-				.json({ message: "Utente non trovato nel database." });
+				.json({
+					message: "Utente non trovato nella tabella blockchain.",
+				});
+		}
 
-		const quota = parseFloat(dbResult.rows[0].quota) || 0;
+		// b. Recuperiamo i dettagli dell'utente tramite l'id_wallet
+		const userAnswer = await getKV("User", String(userId));
+		let userData = userAnswer?.value || userAnswer?.answer || userAnswer;
+		if (typeof userData === "string") {
+			try {
+				userData = JSON.parse(userData);
+			} catch (e) {}
+		}
 
+		if (!userData || userData.quota === undefined) {
+			return res
+				.status(404)
+				.json({
+					message: "Quota utente non trovata sulla blockchain.",
+				});
+		}
+
+		const quota = parseFloat(userData.quota) || 0;
+
+		// 5. Assegnazione valore del voto
 		let valoreAssegnato = 0;
 		if (voto === "favorevole") valoreAssegnato = quota;
 		else if (voto === "contrario") valoreAssegnato = -quota;
@@ -256,7 +287,7 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 			value: valoreAssegnato,
 		};
 
-		// 5. Salvataggio del voto in blockchain
+		// 6. Salvataggio del voto in blockchain
 		const addJson = await addKV(
 			"Votation",
 			[meetingId, String(voteIndex)],

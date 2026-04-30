@@ -59,7 +59,39 @@ const isCeoOrAdmin = (req, res, next) => {
 	}
 };
 
+// =========================================
+// PRE-MIDDLEWARE: Verifica rapida del Token
+// =========================================
+// Questo intercetta la richiesta prima della blockchain.
+const quickTokenCheck = (req, res, next) => {
+	const authHeader = req.headers["authorization"];
+	const tokenFromHeader = authHeader && authHeader.split(" ")[1];
+
+	// CASO 1: Se c'è un token, lo validiamo subito
+	if (tokenFromHeader) {
+		try {
+			const decoded = jwt.verify(tokenFromHeader, JWT_SECRET);
+			console.log(
+				"Token verificato con successo (bypass blockchain) per:",
+				decoded.id_wallet,
+			);
+			// Rispondiamo subito al frontend, bloccando l'esecuzione successiva
+			return res
+				.status(200)
+				.json({ message: "Token valido, accesso consentito." });
+		} catch (jwtError) {
+			return res
+				.status(401)
+				.json({ message: "Token scaduto o non valido." });
+		}
+	}
+
+	// Se non c'è il token, passiamo la palla al middleware successivo (fetchUserFromBlockchain)
+	next();
+};
+
 module.exports = {
 	verifyToken,
 	isCeoOrAdmin,
+	quickTokenCheck,
 };

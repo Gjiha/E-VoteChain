@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
 					// Token scaduto/non valido: puliamo il localStorage e andiamo al login
 					console.warn("Token non valido. Pulizia sessione...");
 					localStorage.clear();
-					window.location.href = "./login.html";
+					//window.location.href = "./login.html";
 				}
 			} catch (error) {
 				// Se il server è spento o c'è un errore di rete

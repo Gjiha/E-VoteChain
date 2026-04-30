@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggiungi Utente - E-vote CEO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Sources/css/dashboard.css">
+    <link rel="stylesheet" href="Sources/css/create_meeting.css">
+    <link rel="stylesheet" href="Sources/css/add_user.css">
+    <script defer src="Sources/js/add_user.js"></script>
+</head>
+
+<body>
+
+    <aside>
+        <div class="brand">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+            </svg>
+            UniTorV E-Vote
+        </div>
+
+        <div class="history-title">Menu</div>
+        <ul class="history-list">
+            <li class="history-item" onclick="window.location.href='ceo_dashboard.html'">Torna alla Dashboard</li>
+            <li class="history-item" onclick="window.location.href='manage_user.html'">Gestione Utenti</li>
+        </ul>
+    </aside>
+
+    <main>
+        <header>
+            <a href="javascript:history.go(-1)" class="btn-back">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Indietro
+            </a>
+            <div class="user-profile">
+                <span id="userNameHeader">Caricamento...</span>
+                <div class="avatar" id="userInitials">--</div>
+            </div>
+        </header>
+
+        <h1>Aggiungi <span>Utente</span></h1>
+        <p style="margin-bottom: 30px; color: var(--gray-text);">Registra un nuovo utente sulla Blockchain. Le
+            credenziali gli permetteranno l'accesso al sistema.</p>
+
+        <div class="form-card">
+            <form id="addUserForm">
+
+                <div class="form-section">
+                    <h3>Anagrafica</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nome">Nome</label>
+                            <input type="text" id="nome" placeholder="Es: Mario" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="cognome">Cognome</label>
+                            <input type="text" id="cognome" placeholder="Es: Rossi" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="email">Indirizzo Email</label>
+                        <input type="email" id="email" placeholder="mario.rossi@esempio.it" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Blockchain & Permessi</h3>
+                    <div class="form-group">
+                        <label for="id_wallet">ID Wallet Pubblico</label>
+                        <input type="text" id="id_wallet" placeholder="Es: 0xAbC123..." required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="quota">Quota / Peso Voto</label>
+                            <input type="number" id="quota" placeholder="Es: 10" min="1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="classe">Classe (Ruolo)</label>
+                            <select id="classe"
+                                style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 15px; background-color: var(--gray-light); height: 45px;">
+                                <option value="membro">Membro</option>
+                                <option value="ceo">CEO</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Credenziali di Accesso</h3>
+                    <div class="form-group">
+                        <label for="psw">Password (in chiaro)</label>
+                        <input type="password" id="psw" placeholder="Inserisci la password da fornire all'utente"
+                            required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit" id="deployUserBtn">
+                    Registra Utente su Blockchain
+                </button>
+
+                <div class="status-message" id="status"></div>
+            </form>
+        </div>
+    </main>
+
+</body>
+
+</html>
