@@ -1,4 +1,5 @@
 const { getKV } = require("../mapping/mapping.js");
+const { formatLog } = require("../utils/logger_utils.js");
 
 const fetchUserFromBlockchain = async (req, res, next) => {
 	try {
@@ -16,25 +17,49 @@ const fetchUserFromBlockchain = async (req, res, next) => {
 					emailTable = JSON.parse(emailTable);
 				} catch (e) {
 					console.error(
-						"Errore parsing tabella utenti blockchain:",
-						e,
+						formatLog(
+							req,
+							500,
+							`Errore parsing tabella utenti blockchain: ${e.message}`,
+						),
 					);
 					emailTable = {};
 				}
 			}
 
-			// Cerchiamo l'id_wallet corrispondente all'email fornita
 			targetId = emailTable ? emailTable[email] : null;
 
 			if (!targetId) {
+				console.log(
+					formatLog(
+						req,
+						404,
+						`Email non registrata nella blockchain: ${email}`,
+					),
+				);
 				return res.status(404).json({
 					message: `L'email ${email} non è registrata nel sistema blockchain.`,
 				});
 			}
+
+			console.log(
+				formatLog(
+					req,
+					200,
+					`Risoluzione identità riuscita: email ${email} → id_wallet ${targetId}`,
+				),
+			);
 		}
 
 		// 2. Controllo validità dell'ID finale
 		if (!targetId) {
+			console.log(
+				formatLog(
+					req,
+					400,
+					"Identificativo mancante: né id_wallet né email forniti.",
+				),
+			);
 			return res.status(400).json({
 				message:
 					"Identificativo mancante: fornire id_wallet oppure email.",
@@ -46,17 +71,30 @@ const fetchUserFromBlockchain = async (req, res, next) => {
 		let userData = response?.value;
 
 		if (!userData) {
+			console.log(
+				formatLog(
+					req,
+					404,
+					`Nessun dato utente trovato sulla blockchain per id_wallet: ${targetId}`,
+				),
+			);
 			return res.status(404).json({
 				message:
 					"Dati utente non trovati sulla blockchain per l'ID risolto.",
 			});
 		}
 
-		// Parsing finale del JSON utente
 		if (typeof userData === "string") {
 			try {
 				userData = JSON.parse(userData);
 			} catch (e) {
+				console.error(
+					formatLog(
+						req,
+						500,
+						`Errore parsing dati utente dalla blockchain per id_wallet: ${targetId}. Dettaglio: ${e.message}`,
+					),
+				);
 				return res.status(500).json({
 					message:
 						"Errore nell'integrità dei dati salvati sulla blockchain.",
@@ -64,11 +102,19 @@ const fetchUserFromBlockchain = async (req, res, next) => {
 			}
 		}
 
-		// Attacchiamo l'utente alla richiesta per i passaggi successivi (es. login_route.js)
+		console.log(
+			formatLog(
+				req,
+				200,
+				`Dati utente recuperati con successo dalla blockchain per id_wallet: ${targetId}`,
+			),
+		);
 		req.dbUser = userData;
 		next();
 	} catch (err) {
-		console.error("Errore middleware Blockchain:", err);
+		console.error(
+			formatLog(req, 500, `Errore middleware Blockchain: ${err.message}`),
+		);
 		res.status(500).json({
 			message: "Errore tecnico durante il recupero dei dati utente.",
 		});

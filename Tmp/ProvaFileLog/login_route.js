@@ -4,9 +4,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fetchUserFromBlockchain = require("../middleware/fetch_user_middle.js");
 const { quickTokenCheck } = require("../middleware/auth_middle.js");
-const { formatLog } = require("../utils/logger_utils.js");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
+// =========================================================
+// FUNZIONE HELPER PER LA FORMATTAZIONE DEI LOG
+// Formato: [timestamp][ip-sorgente][ip-destinazione][action/route][codice][comment]
+// =========================================================
+const formatLog = (req, statusCode, comment) => {
+	const timestamp = new Date().toISOString();
+	const ipSorgente = req.ip || req.socket?.remoteAddress || "Unknown";
+	const ipDestinazione = req.socket?.localAddress || "Unknown";
+	const actionRoute = `${req.method} ${req.originalUrl || req.url}`;
+	return `[${timestamp}][${ipSorgente}][${ipDestinazione}][${actionRoute}][${statusCode}][${comment}]`;
+};
 
 // =========================================
 // ROTTA DI LOGIN

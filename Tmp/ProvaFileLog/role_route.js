@@ -2,7 +2,17 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleware/auth_middle.js");
 
-const { formatLog } = require("../utils/logger_utils.js");
+// =========================================================
+// FUNZIONE HELPER PER LA FORMATTAZIONE DEI LOG
+// Formato: [timestamp][ip-sorgente][ip-destinazione][action/route][codice][comment]
+// =========================================================
+const formatLog = (req, statusCode, comment) => {
+	const timestamp = new Date().toISOString();
+	const ipSorgente = req.ip || req.socket?.remoteAddress || "Unknown";
+	const ipDestinazione = req.socket?.localAddress || "Unknown";
+	const actionRoute = `${req.method} ${req.originalUrl || req.url}`;
+	return `[${timestamp}][${ipSorgente}][${ipDestinazione}][${actionRoute}][${statusCode}][${comment}]`;
+};
 
 router.get("/check-role", verifyToken, (req, res) => {
 	try {

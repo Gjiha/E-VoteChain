@@ -2,25 +2,10 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 
-// 1. Importiamo i middleware per la sicurezza
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth.js");
-
-// 2. Importiamo le funzioni per comunicare con la Blockchain
+const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
 const { addKV, getKeysCopy, getKV } = require("../mapping/mapping.js");
 
-// =========================================================
-// FUNZIONE HELPER PER LA FORMATTAZIONE DEI LOG
-// Formato: [timestamp][ip-sorgente][ip-destinazione][action/route][codice][comment]
-// =========================================================
-const formatLog = (req, statusCode, comment) => {
-	const timestamp = new Date().toISOString();
-	// Recuperiamo gli IP. Se non sono disponibili, inseriamo "Unknown"
-	const ipSorgente = req.ip || req.socket?.remoteAddress || "Unknown";
-	const ipDestinazione = req.socket?.localAddress || "Unknown";
-	const actionRoute = `${req.method} ${req.originalUrl || req.url}`;
-
-	return `[${timestamp}][${ipSorgente}][${ipDestinazione}][${actionRoute}][${statusCode}][${comment}]`;
-};
+const { formatLog } = require("../utils/logger_utils.js");
 
 // =========================================================
 // ROTTA: Recupera tutti gli utenti dalla Blockchain (SOLO CEO)

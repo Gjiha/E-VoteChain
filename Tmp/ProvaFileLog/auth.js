@@ -1,30 +1,40 @@
 const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
+// =========================================================
+// FUNZIONE HELPER PER LA FORMATTAZIONE DEI LOG
+// Formato: [timestamp][ip-sorgente][ip-destinazione][action/route][codice][comment]
+// =========================================================
+const formatLog = (req, statusCode, comment) => {
+	const timestamp = new Date().toISOString();
+	const ipSorgente = req.ip || req.socket?.remoteAddress || "Unknown";
+	const ipDestinazione = req.socket?.localAddress || "Unknown";
+	const actionRoute = `${req.method} ${req.originalUrl || req.url}`;
+	return `[${timestamp}][${ipSorgente}][${ipDestinazione}][${actionRoute}][${statusCode}][${comment}]`;
+};
+
 /**
  * Middleware 1: Verifica la validità del JWT
  * Da usare su TUTTE le rotte protette
  */
 const verifyToken = (req, res, next) => {
-	// Cerca il token nell'header Authorization (formato "Bearer <token>")
 	const authHeader = req.headers["authorization"];
 	const token = authHeader && authHeader.split(" ")[1];
 
 	if (!token) {
+		console.log(formatLog(req, 401, "Token mancante. Accesso negato."));
 		return res
 			.status(401)
 			.json({ message: "Token mancante. Accesso negato." });
 	}
 
 	try {
-		// Verifica e decodifica il token
 		const decoded = jwt.verify(token, JWT_SECRET);
-
-		// Salva i dati dell'utente nella request per usarli nei middleware successivi
 		req.user = decoded; // conterra' { id_wallet, classe, iat, exp }
-
+		console.log(formatLog(req, 200, `Token valido per wallet: ${decoded.id_wallet}`));
 		next();
 	} catch (err) {
+		console.log(formatLog(req, 403, `Token non valido o scaduto. Dettaglio: ${err.message}`));
 		return res.status(403).json({ message: "Token non valido o scaduto." });
 	}
 };
@@ -34,24 +44,21 @@ const verifyToken = (req, res, next) => {
  * Da usare SOLO sulle rotte dedicate alla dashboard CEO
  */
 const isCeoOrAdmin = (req, res, next) => {
-	// Assicuriamoci che verifyToken sia stato eseguito prima
-
 	if (!req.user || !req.user.classe) {
+		console.log(formatLog(req, 403, "Dati utente o ruolo mancanti nel token."));
 		return res
 			.status(403)
 			.json({ message: "Dati utente o ruolo mancanti nel token." });
 	}
 
-	// Applichiamo la stessa identica logica robusta che avevi nel frontend
 	const roleString = String(req.user.classe).toUpperCase().trim();
-
 	const isCEO = roleString === "CEO";
 
 	if (isCEO) {
-		// L'utente ha i permessi, procedi alla rotta
+		console.log(formatLog(req, 200, `Accesso CEO consentito per wallet: ${req.user.id_wallet}`));
 		next();
 	} else {
-		// L'utente è loggato (token valido) ma non è CEO
+		console.log(formatLog(req, 403, `Accesso negato. Ruolo insufficiente: ${roleString} (wallet: ${req.user.id_wallet})`));
 		return res.status(403).json({
 			message:
 				"Accesso negato. Privilegi insufficienti per questa operazione.",
@@ -62,31 +69,27 @@ const isCeoOrAdmin = (req, res, next) => {
 // =========================================
 // PRE-MIDDLEWARE: Verifica rapida del Token
 // =========================================
-// Questo intercetta la richiesta prima della blockchain.
 const quickTokenCheck = (req, res, next) => {
 	const authHeader = req.headers["authorization"];
 	const tokenFromHeader = authHeader && authHeader.split(" ")[1];
 
-	// CASO 1: Se c'è un token, lo validiamo subito
 	if (tokenFromHeader) {
 		try {
 			const decoded = jwt.verify(tokenFromHeader, JWT_SECRET);
-			console.log(
-				"Token verificato con successo (bypass blockchain) per:",
-				decoded.id_wallet,
-			);
-			// Rispondiamo subito al frontend, bloccando l'esecuzione successiva
+			console.log(formatLog(req, 200, `Token verificato con successo (bypass blockchain) per wallet: ${decoded.id_wallet}`));
 			return res
 				.status(200)
 				.json({ message: "Token valido, accesso consentito." });
 		} catch (jwtError) {
+			console.log(formatLog(req, 401, `Token scaduto o non valido. Dettaglio: ${jwtError.message}`));
 			return res
 				.status(401)
 				.json({ message: "Token scaduto o non valido." });
 		}
 	}
 
-	// Se non c'è il token, passiamo la palla al middleware successivo (fetchUserFromBlockchain)
+	// Nessun token presente: si prosegue con fetchUserFromBlockchain
+	console.log(formatLog(req, 200, "Nessun token fornito. Proseguimento verso autenticazione blockchain."));
 	next();
 };
 

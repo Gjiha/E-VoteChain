@@ -1,5 +1,6 @@
-const crypto = require("crypto"); // <-- CAMBIATO DA BCRYPT A CRYPTO
-const { getHistoryKV } = require("../mapping/mapping");
+const crypto = require("crypto");
+const { getHistoryKV } = require("../mapping/mapping.js");
+const { formatLog } = require("../utils/logger_utils.js");
 
 const checkIfAlreadyVoted = async (req, res, next) => {
 	try {
@@ -7,6 +8,13 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 		const userEmail = req.user.email;
 
 		if (!meetingId || !voteIndex) {
+			console.log(
+				formatLog(
+					req,
+					400,
+					"Dati della votazione mancanti (meetingId o voteIndex).",
+				),
+			);
 			return res
 				.status(400)
 				.json({ message: "Dati della votazione mancanti." });
@@ -19,7 +27,13 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 				String(voteIndex),
 			]);
 		} catch (err) {
-			console.warn("Nessuno storico trovato (prima votazione).");
+			console.log(
+				formatLog(
+					req,
+					200,
+					`Nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Prima votazione consentita.`,
+				),
+			);
 			return next();
 		}
 
@@ -28,16 +42,21 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 			!Array.isArray(historyResult) ||
 			historyResult.length === 0
 		) {
+			console.log(
+				formatLog(
+					req,
+					200,
+					`Storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Voto consentito.`,
+				),
+			);
 			return next();
 		}
 
-		// Calcoliamo l'hash SHA-256 dell'utente che sta provando a votare in questo momento
 		const userHash = crypto
 			.createHash("sha256")
 			.update(userEmail)
 			.digest("hex");
 
-		// Cicliamo lo storico per vedere se questo hash esiste già
 		for (const record of historyResult) {
 			if (record.isDelete) continue;
 
@@ -59,8 +78,14 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 
 			const hashPartecipante = innerValue?.partecipante;
 
-			// Essendo SHA-256 deterministico, possiamo fare un semplice confronto tra stringhe!
 			if (hashPartecipante === userHash) {
+				console.log(
+					formatLog(
+						req,
+						403,
+						`Voto duplicato rilevato per utente (hash: ${userHash}) su meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
+					),
+				);
 				return res.status(403).json({
 					message:
 						"Voto rifiutato: Hai già espresso la tua preferenza per questa votazione.",
@@ -68,10 +93,22 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 			}
 		}
 
-		// Nessuna corrispondenza trovata: l'utente non ha ancora votato
+		console.log(
+			formatLog(
+				req,
+				200,
+				`Nessun voto precedente rilevato per utente (hash: ${userHash}). Voto consentito.`,
+			),
+		);
 		next();
 	} catch (error) {
-		console.error("Errore nel middleware checkIfAlreadyVoted:", error);
+		console.error(
+			formatLog(
+				req,
+				500,
+				`Errore nel middleware checkIfAlreadyVoted: ${error.message}`,
+			),
+		);
 		return res.status(500).json({
 			message: "Errore di sistema durante la verifica del voto.",
 		});
