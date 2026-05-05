@@ -20,13 +20,13 @@ const verifyToken = (req, res, next) => {
 	try {
 		const decoded = jwt.verify(token, JWT_SECRET);
 		req.user = decoded; // conterra' { id_wallet, classe, iat, exp }
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Token valido per wallet: ${decoded.id_wallet}`,
-			),
-		);
+		// console.log(
+		// 	formatLog(
+		// 		req,
+		// 		200,
+		// 		`Token valido per wallet: ${decoded.id_wallet}`,
+		// 	),
+		// );
 		next();
 	} catch (err) {
 		console.log(
@@ -58,13 +58,13 @@ const isCeoOrAdmin = (req, res, next) => {
 	const isCEO = roleString === "CEO";
 
 	if (isCEO) {
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Accesso CEO consentito per wallet: ${req.user.id_wallet}`,
-			),
-		);
+		// console.log(
+		// 	formatLog(
+		// 		req,
+		// 		200,
+		// 		`Accesso CEO consentito per wallet: ${req.user.id_wallet}`,
+		// 	),
+		// );
 		next();
 	} else {
 		console.log(
