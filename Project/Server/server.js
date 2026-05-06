@@ -10,6 +10,7 @@ const meetingRoutes = require("./routes/meetings_route.js");
 const usersRoutes = require("./routes/users_route.js");
 const roleRoutes = require("./routes/role_route.js");
 const votationRoute = require("./routes/votation_route.js");
+const loggerRoute = require("./routes/logger_route.js");
 
 const app = express();
 
@@ -23,6 +24,7 @@ app.use("/api/v1/", fileRoutes);
 app.use("/api/v1/", dbRoutes);
 app.use("/api/v1/", roleRoutes);
 app.use("/api/v1/", votationRoute);
+//app.use("/api/v1/", loggerRoute);
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

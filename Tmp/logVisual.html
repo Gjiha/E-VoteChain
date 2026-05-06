@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Monitoring Dashboard</title>
+    <style>
+        /* CSS: Stile della Dashboard */
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-primary: #ffffff;
+            --text-secondary: #b3b3b3;
+            --alert-color: #ff5252;
+            --signal-color: #4caf50;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .controls button {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            margin-left: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .controls button:hover,
+        .controls button.active {
+            background-color: #333;
+        }
+
+        .table-container {
+            background-color: var(--surface-color);
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th,
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Badge colorati per i log */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .badge.alert {
+            background-color: rgba(255, 82, 82, 0.2);
+            color: var(--alert-color);
+        }
+
+        .badge.signal {
+            background-color: rgba(76, 175, 80, 0.2);
+            color: var(--signal-color);
+        }
+
+        /* Stile codice per route e commenti */
+        code {
+            background-color: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>API Monitoring 📡</h1>
+        <div class="controls">
+            <button id="btn-all" class="active" onclick="filterLogs('All')">Tutti</button>
+            <button id="btn-alert" onclick="filterLogs('Alert')">Solo Alert</button>
+            <button id="btn-signal" onclick="filterLogs('Signal')">Solo Signal</button>
+            <button onclick="loadLogs()" style="border-color: #2196f3;">🔄 Aggiorna</button>
+        </div>
+    </header>
+
+    <main class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Timestamp</th>
+                    <th>Sorgente ➔ Destinazione</th>
+                    <th>Route / Action</th>
+                    <th>Status</th>
+                    <th>Messaggio</th>
+                </tr>
+            </thead>
+            <tbody id="log-table-body">
+                <tr>
+                    <td colspan="6" class="loading">Caricamento log in corso...</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        // Variabile globale per mantenere i log caricati
+        let currentLogs = [];
+
+        /**
+         * Funzione cruciale: Estrae i dati dalla tua stringa formato custom
+         */
+        function parseLogString(type, logString) {
+            const innerContent = logString.slice(2, -2);
+            const parts = innerContent.split('][');
+
+            return {
+                type: type, // "Alert" o "Signal"
+                timestamp: parts[0] ? new Date(parts[0]).toLocaleString() : 'N/A',
+                sourceIp: parts[1] || '-',
+                destIp: parts[2] || '-',
+                route: parts[3] || '-',
+                code: parts[4] || '-',
+                comment: parts[5] || '-'
+            };
+        }
+
+        /**
+         * Funzione che recupera i dati dal Backend Node.js tramite la rotta API esposta
+         */
+        async function fetchLogsFromBackend() {
+            try {
+                // Endpoint combinato da app.js (/api/v1/) e logger_route.js (/api/logs/history)
+                // Se apri la pagina HTML da locale (senza un server web), modifica l'URL aggiungendo l'host
+                // Esempio: const response = await fetch('http://localhost:3000/api/v1/api/logs/history');
+                const response = await fetch('http://localhost:30000/api/v1/logs/history');
+
+                if (!response.ok) {
+                    throw new Error(`Errore HTTP: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                return data;
+
+            } catch (error) {
+                console.error("Errore nel recupero dei log dal backend:", error);
+                throw error;
+            }
+        }
+
+        /**
+         * Carica i log, li analizza e aggiorna la tabella
+         */
+        async function loadLogs() {
+            const tbody = document.getElementById('log-table-body');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">Sincronizzazione con la blockchain...</td></tr>';
+
+            try {
+                const rawData = await fetchLogsFromBackend();
+
+                currentLogs = rawData.map(item => parseLogString(item.type, item.raw));
+
+                currentLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+                renderTable(currentLogs);
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="6" style="color: var(--alert-color); text-align: center;">Errore nel caricamento dei log: Impossibile contattare il server.</td></tr>`;
+            }
+        }
+
+        /**
+         * Disegna le righe HTML della tabella
+         */
+        function renderTable(logsToRender) {
+            const tbody = document.getElementById('log-table-body');
+            tbody.innerHTML = '';
+
+            if (logsToRender.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading">Nessun log trovato.</td></tr>';
+                return;
+            }
+
+            logsToRender.forEach(log => {
+                const tr = document.createElement('tr');
+
+                const codeColor = parseInt(log.code) >= 400 ? 'var(--alert-color)' : 'var(--signal-color)';
+                const badgeClass = log.type.toLowerCase();
+
+                tr.innerHTML = `
+                    <td><span class="badge ${badgeClass}">${log.type}</span></td>
+                    <td>${log.timestamp}</td>
+                    <td><code>${log.sourceIp}</code> ➔ <code>${log.destIp}</code></td>
+                    <td><code>${log.route}</code></td>
+                    <td style="color: ${codeColor}; font-weight: bold;">${log.code}</td>
+                    <td>${log.comment}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        /**
+         * Filtra i log mostrati a schermo
+         */
+        function filterLogs(type) {
+            document.querySelectorAll('.controls button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${type.toLowerCase()}`).classList.add('active');
+
+            if (type === 'All') {
+                renderTable(currentLogs);
+            } else {
+                const filtered = currentLogs.filter(log => log.type === type);
+                renderTable(filtered);
+            }
+        }
+
+        window.onload = loadLogs;
+
+    </script>
+</body>
+
+</html>
