@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
 const { getKeysCopy, getKV, addKV } = require("../mapping/mapping.js");
 
-const { formatLog } = require("../utils/logger_utils.js");
+const Logger = require("../utils/logger_utils.js");
 
 router.get("/meetings", verifyToken, async (req, res) => {
 	try {
@@ -12,12 +12,10 @@ router.get("/meetings", verifyToken, async (req, res) => {
 		const isCEO = userRole === "CEO";
 
 		if (!userEmail && !isCEO) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"Recupero riunioni fallito: email utente mancante nel token.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"Recupero riunioni fallito: email utente mancante nel token.",
 			);
 			return res
 				.status(400)
@@ -58,12 +56,10 @@ router.get("/meetings", verifyToken, async (req, res) => {
 					userMeetings.push(meetingData);
 				}
 			} catch (e) {
-				console.log(
-					formatLog(
-						req,
-						200,
-						`Errore nel recupero della singola riunione con chiave: ${key}. Saltata.`,
-					),
+				await Logger.alert(
+					req,
+					500,
+					`Errore nel recupero della singola riunione con chiave: ${key}. Saltata.`,
 				);
 				continue;
 			}
@@ -71,39 +67,34 @@ router.get("/meetings", verifyToken, async (req, res) => {
 
 		userMeetings.sort((a, b) => b.timestamp - a.timestamp);
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Riunioni recuperate con successo per utente: ${userEmail || "CEO"}. Totale trovate: ${userMeetings.length}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Riunioni recuperate con successo per utente: ${userEmail || "CEO"}. Totale trovate: ${userMeetings.length}.`,
 		);
 		return res.status(200).json({
 			message: "ok",
 			data: userMeetings,
 		});
 	} catch (err) {
-		console.error(
-			formatLog(req, 500, `Errore recupero riunioni: ${err.message}`),
+		await Logger.alert(
+			req,
+			500,
+			`Errore recupero riunioni: ${err.message}`,
 		);
 		return res.status(500).json({ message: "Errore interno server" });
 	}
 });
 
-// =========================================================
-// NUOVA ROTTA: Crea una riunione (SOLO PER CEO/ADMIN)
-// =========================================================
 router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 	try {
 		const { meetingKey, meetingData } = req.body;
 
 		if (!meetingKey || !meetingData) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"Creazione riunione fallita: meetingKey o meetingData mancanti.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"Creazione riunione fallita: meetingKey o meetingData mancanti.",
 			);
 			return res
 				.status(400)
@@ -128,20 +119,20 @@ router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
 			JSON.stringify(statiVotazioni),
 		);
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Riunione creata con successo. Chiave: ${meetingKey}, Votazioni previste: ${numeroVotazioni}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Riunione creata con successo. Chiave: ${meetingKey}, Votazioni previste: ${numeroVotazioni}.`,
 		);
 		return res.status(200).json({
 			message: "Riunione e votazioni create con successo!",
 			data: addJson,
 		});
 	} catch (err) {
-		console.error(
-			formatLog(req, 500, `Errore creazione riunione: ${err.message}`),
+		await Logger.alert(
+			req,
+			500,
+			`Errore creazione riunione: ${err.message}`,
 		);
 		return res
 			.status(500)

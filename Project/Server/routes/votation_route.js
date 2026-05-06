@@ -5,25 +5,22 @@ const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
 const { checkIfAlreadyVoted } = require("../middleware/check_vote_middle.js");
 const { getKV, addKV, getHistoryKV } = require("../mapping/mapping.js");
 
-const { formatLog } = require("../utils/logger_utils.js");
+const Logger = require("../utils/logger_utils.js");
 
 router.get("/get-votations-status", verifyToken, async (req, res) => {
 	try {
 		const meetingId = req.query.meetingId;
 		if (!meetingId) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"get-votations-status fallita: parametro meetingId mancante.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"get-votations-status fallita: parametro meetingId mancante.",
 			);
 			return res
 				.status(400)
 				.json({ message: "Parametro meetingId mancante." });
 		}
 
-		// 1. Recupero Dati Riunione per controllare le date
 		const reunionAnswer = await getKV("Reunion", meetingId);
 		let meetingData = reunionAnswer?.value;
 
@@ -31,17 +28,14 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 			try {
 				meetingData = JSON.parse(meetingData);
 			} catch (e) {
-				console.error(
-					formatLog(
-						req,
-						500,
-						`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
-					),
+				await Logger.alert(
+					req,
+					500,
+					`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
 				);
 			}
 		}
 
-		// Calcolo stato termine riunione
 		const now = new Date();
 		let isMeetingEnded = false;
 		if (meetingData && meetingData.dataFine) {
@@ -51,7 +45,6 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 			}
 		}
 
-		// 2. Recupero stato votazioni attuale
 		const kvAnswer = await getKV("Votation", [meetingId, "status"]);
 		let votationsData = kvAnswer?.value;
 
@@ -64,16 +57,13 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 		}
 		if (!votationsData) votationsData = {};
 
-		// 3. Elaborazione e Chiusura Automatica (se riunione terminata)
 		let hasModifications = false;
 
 		if (isMeetingEnded) {
-			console.log(
-				formatLog(
-					req,
-					200,
-					`Riunione ${meetingId} terminata. Avvio chiusura automatica votazioni aperte.`,
-				),
+			await Logger.signal(
+				req,
+				200,
+				`Riunione ${meetingId} terminata. Avvio chiusura automatica votazioni aperte.`,
 			);
 			for (const [voteIndex, status] of Object.entries(votationsData)) {
 				if (status === true || status === "true") {
@@ -84,12 +74,10 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 							String(voteIndex),
 						]);
 					} catch (err) {
-						console.log(
-							formatLog(
-								req,
-								200,
-								`Nessuno storico trovato per voteIndex: ${voteIndex} su meetingId: ${meetingId}. Chiusura con zero voti.`,
-							),
+						await Logger.signal(
+							req,
+							200,
+							`Nessuno storico trovato per voteIndex: ${voteIndex} su meetingId: ${meetingId}. Chiusura con zero voti.`,
 						);
 						historyResult = [];
 					}
@@ -157,48 +145,39 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 					votationsData[voteIndex] = "closed";
 					hasModifications = true;
 
-					console.log(
-						formatLog(
-							req,
-							200,
-							`Votazione ${voteIndex} su meetingId: ${meetingId} chiusa automaticamente. Esito: ${sommaTotale}, Favorevoli: ${countFavorevoli}, Contrari: ${countContrari}, Astenuti: ${countAstenuti}.`,
-						),
+					await Logger.signal(
+						req,
+						200,
+						`Votazione ${voteIndex} su meetingId: ${meetingId} chiusa automaticamente. Esito: ${sommaTotale}, Favorevoli: ${countFavorevoli}, Contrari: ${countContrari}, Astenuti: ${countAstenuti}.`,
 					);
 				}
 			}
 		}
 
-		// 4. Salvataggio delle modifiche allo Status in Blockchain
 		if (hasModifications) {
 			await addKV(
 				"Votation",
 				[meetingId, "status"],
 				JSON.stringify(votationsData),
 			);
-			console.log(
-				formatLog(
-					req,
-					200,
-					`Status votazioni aggiornato sulla blockchain per meetingId: ${meetingId}.`,
-				),
+			await Logger.signal(
+				req,
+				200,
+				`Status votazioni aggiornato sulla blockchain per meetingId: ${meetingId}.`,
 			);
 		}
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Stato votazioni restituito con successo per meetingId: ${meetingId}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Stato votazioni restituito con successo per meetingId: ${meetingId}.`,
 		);
 		return res.status(200).json({ message: "ok", data: votationsData });
 	} catch (err) {
-		console.error(
-			formatLog(
-				req,
-				500,
-				`Errore interno in get-votations-status: ${err.message}`,
-			),
+		await Logger.alert(
+			req,
+			500,
+			`Errore interno in get-votations-status: ${err.message}`,
 		);
 		return res.status(500).json({ message: "Errore interno server" });
 	}
@@ -208,12 +187,10 @@ router.post("/aggiorna-status", verifyToken, isCeoOrAdmin, async (req, res) => {
 	try {
 		const { meetingId, votationsStatus } = req.body;
 		if (!meetingId || !votationsStatus) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"aggiorna-status fallita: meetingId o votationsStatus mancanti.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"aggiorna-status fallita: meetingId o votationsStatus mancanti.",
 			);
 			return res.status(400).json({ message: "Dati mancanti" });
 		}
@@ -224,19 +201,19 @@ router.post("/aggiorna-status", verifyToken, isCeoOrAdmin, async (req, res) => {
 			JSON.stringify(votationsStatus),
 		);
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Stato votazioni aggiornato con successo per meetingId: ${meetingId}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Stato votazioni aggiornato con successo per meetingId: ${meetingId}.`,
 		);
 		return res
 			.status(200)
 			.json({ message: "Stato aggiornato", data: updateJson });
 	} catch (err) {
-		console.error(
-			formatLog(req, 500, `Errore in aggiorna-status: ${err.message}`),
+		await Logger.alert(
+			req,
+			500,
+			`Errore in aggiorna-status: ${err.message}`,
 		);
 		return res.status(500).json({ message: "Errore interno server" });
 	}
@@ -245,37 +222,33 @@ router.post("/aggiorna-status", verifyToken, isCeoOrAdmin, async (req, res) => {
 router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 	try {
 		const { meetingId, voteIndex, voto } = req.body;
-
 		const userEmail = req.user.email;
 		const userRole = String(req.user.classe).toUpperCase().trim();
 		const isCEO = userRole === "CEO";
 
 		if (!meetingId || !voteIndex || !voto) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					`add-vote fallita: parametri mancanti. meetingId: ${meetingId}, voteIndex: ${voteIndex}, voto: ${voto}.`,
-				),
+			await Logger.alert(
+				req,
+				400,
+				`add-vote fallita: parametri mancanti. meetingId: ${meetingId}, voteIndex: ${voteIndex}, voto: ${voto}.`,
 			);
-			return res.status(400).json({
-				message: "Dati mancanti (meetingId, voteIndex, voto).",
-			});
+			return res
+				.status(400)
+				.json({
+					message: "Dati mancanti (meetingId, voteIndex, voto).",
+				});
 		}
 		if (!userEmail) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"add-vote fallita: email utente mancante nel token.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"add-vote fallita: email utente mancante nel token.",
 			);
 			return res
 				.status(400)
 				.json({ message: "Email utente mancante nel token." });
 		}
 
-		// 2. CONTROLLO PARTECIPAZIONE
 		const reunionAnswer = await getKV("Reunion", meetingId);
 		let meetingData = reunionAnswer?.value;
 
@@ -283,23 +256,19 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 			try {
 				meetingData = JSON.parse(meetingData);
 			} catch (e) {
-				console.error(
-					formatLog(
-						req,
-						500,
-						`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
-					),
+				await Logger.alert(
+					req,
+					500,
+					`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
 				);
 			}
 		}
 
 		if (!meetingData) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`add-vote fallita: riunione non trovata sulla blockchain per meetingId: ${meetingId}.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`add-vote fallita: riunione non trovata sulla blockchain per meetingId: ${meetingId}.`,
 			);
 			return res
 				.status(404)
@@ -308,20 +277,19 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 
 		const partecipanti = meetingData.partecipanti || [];
 		if (!isCEO && !partecipanti.includes(userEmail)) {
-			console.log(
-				formatLog(
-					req,
-					403,
-					`add-vote negata: utente ${userEmail} non autorizzato a votare per meetingId: ${meetingId}.`,
-				),
+			await Logger.alert(
+				req,
+				403,
+				`add-vote negata: utente ${userEmail} non autorizzato a votare per meetingId: ${meetingId}.`,
 			);
-			return res.status(403).json({
-				message:
-					"Accesso negato: non sei autorizzato a votare in questa riunione.",
-			});
+			return res
+				.status(403)
+				.json({
+					message:
+						"Accesso negato: non sei autorizzato a votare in questa riunione.",
+				});
 		}
 
-		// 3. RECUPERO QUOTA DALLA BLOCKCHAIN
 		const tableAnswer = await getKV("User", "table");
 		let emailTable =
 			tableAnswer?.value || tableAnswer?.answer || tableAnswer;
@@ -335,16 +303,16 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 
 		const userId = emailTable ? emailTable[userEmail] : null;
 		if (!userId) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`add-vote fallita: utente ${userEmail} non trovato nella tabella blockchain.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`add-vote fallita: utente ${userEmail} non trovato nella tabella blockchain.`,
 			);
-			return res.status(404).json({
-				message: "Utente non trovato nella tabella blockchain.",
-			});
+			return res
+				.status(404)
+				.json({
+					message: "Utente non trovato nella tabella blockchain.",
+				});
 		}
 
 		const userAnswer = await getKV("User", String(userId));
@@ -356,32 +324,29 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 		}
 
 		if (!userData || userData.quota === undefined) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`add-vote fallita: quota non trovata per userId: ${userId}.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`add-vote fallita: quota non trovata per userId: ${userId}.`,
 			);
-			return res.status(404).json({
-				message: "Quota utente non trovata sulla blockchain.",
-			});
+			return res
+				.status(404)
+				.json({
+					message: "Quota utente non trovata sulla blockchain.",
+				});
 		}
 
 		const quota = parseFloat(userData.quota) || 0;
 
-		// 4. Assegnazione valore del voto
 		let valoreAssegnato = 0;
 		if (voto === "favorevole") valoreAssegnato = quota;
 		else if (voto === "contrario") valoreAssegnato = -quota;
 		else if (voto === "astenuto") valoreAssegnato = 0;
 		else {
-			console.log(
-				formatLog(
-					req,
-					400,
-					`add-vote fallita: tipo di voto non valido "${voto}" per utente ${userEmail}.`,
-				),
+			await Logger.alert(
+				req,
+				400,
+				`add-vote fallita: tipo di voto non valido "${voto}" per utente ${userEmail}.`,
 			);
 			return res
 				.status(400)
@@ -398,28 +363,23 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 			value: valoreAssegnato,
 		};
 
-		// 5. Salvataggio del voto in blockchain
 		const addJson = await addKV(
 			"Votation",
 			[meetingId, String(voteIndex)],
 			JSON.stringify(payloadValue),
 		);
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Voto registrato con successo. Utente (hash): ${hashedEmail}, meetingId: ${meetingId}, voteIndex: ${voteIndex}, tipo: ${voto}, valore: ${valoreAssegnato}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Voto registrato con successo. Utente (hash): ${hashedEmail}, meetingId: ${meetingId}, voteIndex: ${voteIndex}, tipo: ${voto}, valore: ${valoreAssegnato}.`,
 		);
 		return res.status(200).json({
 			message: "Voto registrato e salvato con successo!",
 			data: addJson,
 		});
 	} catch (err) {
-		console.error(
-			formatLog(req, 500, `Errore in add-vote: ${err.message}`),
-		);
+		await Logger.alert(req, 500, `Errore in add-vote: ${err.message}`);
 		return res
 			.status(500)
 			.json({ message: "Errore interno del server durante il voto." });
@@ -431,12 +391,10 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 		const { meetingId, voteIndex } = req.body;
 
 		if (!meetingId || !voteIndex) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"validation-vote fallita: meetingId o voteIndex mancanti.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"validation-vote fallita: meetingId o voteIndex mancanti.",
 			);
 			return res
 				.status(400)
@@ -450,16 +408,16 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 				String(voteIndex),
 			]);
 		} catch (err) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`validation-vote: nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`validation-vote: nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
 			);
-			return res.status(404).json({
-				message: "Nessuno storico trovato per questa votazione.",
-			});
+			return res
+				.status(404)
+				.json({
+					message: "Nessuno storico trovato per questa votazione.",
+				});
 		}
 
 		if (
@@ -467,16 +425,16 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 			!Array.isArray(historyResult) ||
 			historyResult.length === 0
 		) {
-			console.log(
-				formatLog(
-					req,
-					200,
-					`validation-vote: storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Niente da validare.`,
-				),
+			await Logger.signal(
+				req,
+				200,
+				`validation-vote: storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Niente da validare.`,
 			);
-			return res.status(200).json({
-				message: "Nessun voto registrato, niente da validare.",
-			});
+			return res
+				.status(200)
+				.json({
+					message: "Nessun voto registrato, niente da validare.",
+				});
 		}
 
 		let sommaTotale = 0;
@@ -532,58 +490,55 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 				JSON.stringify(payloadRisultato),
 			);
 		} catch (saveError) {
-			console.error(
-				formatLog(
-					req,
-					500,
-					`Impossibile salvare il risultato finale per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Dettaglio: ${saveError.message}`,
-				),
-			);
-			return res.status(500).json({
-				message: "Errore durante il salvataggio del risultato.",
-			});
-		}
-
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Scrutinio completato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Esito: ${sommaTotale}, Favorevoli: ${countFavorevoli}, Contrari: ${countContrari}, Astenuti: ${countAstenuti}.`,
-			),
-		);
-		return res.status(200).json({
-			message:
-				"Scrutinio completato e sigillato con successo sulla blockchain.",
-		});
-	} catch (error) {
-		console.error(
-			formatLog(
+			await Logger.alert(
 				req,
 				500,
-				`Errore durante la validazione dei voti: ${error.message}`,
-			),
+				`Impossibile salvare il risultato finale per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Dettaglio: ${saveError.message}`,
+			);
+			return res
+				.status(500)
+				.json({
+					message: "Errore durante il salvataggio del risultato.",
+				});
+		}
+
+		await Logger.signal(
+			req,
+			200,
+			`Scrutinio completato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Esito: ${sommaTotale}, Favorevoli: ${countFavorevoli}, Contrari: ${countContrari}, Astenuti: ${countAstenuti}.`,
 		);
-		return res.status(500).json({
-			message: "Errore interno del server durante la validazione.",
-		});
+		return res
+			.status(200)
+			.json({
+				message:
+					"Scrutinio completato e sigillato con successo sulla blockchain.",
+			});
+	} catch (error) {
+		await Logger.alert(
+			req,
+			500,
+			`Errore durante la validazione dei voti: ${error.message}`,
+		);
+		return res
+			.status(500)
+			.json({
+				message: "Errore interno del server durante la validazione.",
+			});
 	}
 });
 
 router.post("/visualize-vote", verifyToken, async (req, res) => {
 	try {
 		const { meetingId, voteIndex } = req.body;
-
 		const userEmail = req.user.email;
 		const userRole = String(req.user.classe).toUpperCase().trim();
 		const isCEO = userRole === "CEO";
 
 		if (!meetingId || !voteIndex) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"visualize-vote fallita: meetingId o voteIndex mancanti.",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"visualize-vote fallita: meetingId o voteIndex mancanti.",
 			);
 			return res
 				.status(400)
@@ -597,40 +552,36 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 			try {
 				meetingData = JSON.parse(meetingData);
 			} catch (e) {
-				console.error(
-					formatLog(
-						req,
-						500,
-						`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
-					),
+				await Logger.alert(
+					req,
+					500,
+					`Errore parsing dati riunione per meetingId: ${meetingId}. Dettaglio: ${e.message}`,
 				);
 			}
 		}
 
 		if (!meetingData) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`visualize-vote fallita: riunione non trovata per meetingId: ${meetingId}.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`visualize-vote fallita: riunione non trovata per meetingId: ${meetingId}.`,
 			);
 			return res.status(404).json({ message: "Riunione non trovata." });
 		}
 
 		const partecipanti = meetingData.partecipanti || [];
 		if (!isCEO && !partecipanti.includes(userEmail)) {
-			console.log(
-				formatLog(
-					req,
-					403,
-					`visualize-vote negata: utente ${userEmail} non è partecipante della riunione ${meetingId}.`,
-				),
+			await Logger.alert(
+				req,
+				403,
+				`visualize-vote negata: utente ${userEmail} non è partecipante della riunione ${meetingId}.`,
 			);
-			return res.status(403).json({
-				message:
-					"Accesso negato: non sei un partecipante di questa riunione.",
-			});
+			return res
+				.status(403)
+				.json({
+					message:
+						"Accesso negato: non sei un partecipante di questa riunione.",
+				});
 		}
 
 		const voteAnswer = await getKV("Votation", [
@@ -646,16 +597,14 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 		}
 
 		if (!dataObj || !dataObj.dettagliVoti) {
-			console.log(
-				formatLog(
-					req,
-					404,
-					`visualize-vote: risultati non disponibili per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Votazione non ancora chiusa.`,
-				),
+			await Logger.alert(
+				req,
+				404,
+				`visualize-vote: risultati non disponibili per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Votazione non ancora chiusa.`,
 			);
-			return res.status(404).json({
-				message: "Risultati non disponibili.",
-			});
+			return res
+				.status(404)
+				.json({ message: "Risultati non disponibili." });
 		}
 
 		const sommaTotale = dataObj["esito voto"] || 0;
@@ -672,12 +621,10 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 			status = "negativa";
 		}
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`visualize-vote completata per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Status: ${status}, Somma: ${sommaTotale}.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`visualize-vote completata per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Status: ${status}, Somma: ${sommaTotale}.`,
 		);
 		return res.status(200).json({
 			message: "Visualizzazione risultati completata con successo",
@@ -687,17 +634,17 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 			dettagliVoti: dettagliVotiObj,
 		});
 	} catch (err) {
-		console.error(
-			formatLog(
-				req,
-				500,
-				`Errore nel recupero dei risultati: ${err.message}`,
-			),
+		await Logger.alert(
+			req,
+			500,
+			`Errore nel recupero dei risultati: ${err.message}`,
 		);
-		return res.status(500).json({
-			message:
-				"Errore interno del server durante il recupero dei risultati.",
-		});
+		return res
+			.status(500)
+			.json({
+				message:
+					"Errore interno del server durante il recupero dei risultati.",
+			});
 	}
 });
 

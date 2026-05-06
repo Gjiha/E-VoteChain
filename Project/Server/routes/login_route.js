@@ -4,26 +4,20 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const fetchUserFromBlockchain = require("../middleware/fetch_user_middle.js");
 const { quickTokenCheck } = require("../middleware/auth_middle.js");
-const { formatLog } = require("../utils/logger_utils.js");
 
+const Logger = require("../utils/logger_utils.js");
 const JWT_SECRET = process.env.JWT_SECRET;
 
-// =========================================
-// ROTTA DI LOGIN
-// Ordine di esecuzione: 1. check Token -> 2. check Blockchain -> 3. check Password
-// =========================================
 router.post(
 	"/loginCheck",
 	quickTokenCheck,
 	fetchUserFromBlockchain,
 	async (req, res) => {
 		const identificativo = req.body.id_wallet || req.body.email;
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Richiesta di login manuale ricevuta per identificativo: ${identificativo}`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Richiesta di login manuale ricevuta per identificativo: ${identificativo}`,
 		);
 
 		try {
@@ -31,12 +25,10 @@ router.post(
 			const utente = req.dbUser;
 
 			if (!psw) {
-				console.log(
-					formatLog(
-						req,
-						400,
-						`Login fallito per identificativo: ${identificativo}. Password mancante.`,
-					),
+				await Logger.alert(
+					req,
+					400,
+					`Login fallito per identificativo: ${identificativo}. Password mancante.`,
 				);
 				return res.status(400).json({ message: "Password mancante" });
 			}
@@ -56,12 +48,10 @@ router.post(
 
 				delete utente.psw;
 
-				console.log(
-					formatLog(
-						req,
-						200,
-						`Login effettuato con successo per wallet: ${utente.id_wallet} (ruolo: ${utente.classe}).`,
-					),
+				await Logger.signal(
+					req,
+					200,
+					`Login effettuato con successo per wallet: ${utente.id_wallet} (ruolo: ${utente.classe}).`,
 				);
 				return res.status(200).json({
 					message: "Login effettuato",
@@ -69,22 +59,18 @@ router.post(
 					data: utente,
 				});
 			} else {
-				console.log(
-					formatLog(
-						req,
-						401,
-						`Login fallito per identificativo: ${identificativo}. Password errata.`,
-					),
+				await Logger.alert(
+					req,
+					401,
+					`Login fallito per identificativo: ${identificativo}. Password errata.`,
 				);
 				return res.status(401).json({ message: "Password errata" });
 			}
 		} catch (err) {
-			console.error(
-				formatLog(
-					req,
-					500,
-					`Errore interno durante il login: ${err.message}`,
-				),
+			await Logger.alert(
+				req,
+				500,
+				`Errore interno durante il login: ${err.message}`,
 			);
 			return res
 				.status(500)

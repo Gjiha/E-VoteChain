@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const { getHistoryKV } = require("../mapping/mapping.js");
-const { formatLog } = require("../utils/logger_utils.js");
+const Logger = require("../utils/logger_utils.js");
 
 const checkIfAlreadyVoted = async (req, res, next) => {
 	try {
@@ -8,12 +8,10 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 		const userEmail = req.user.email;
 
 		if (!meetingId || !voteIndex) {
-			console.log(
-				formatLog(
-					req,
-					400,
-					"Dati della votazione mancanti (meetingId o voteIndex).",
-				),
+			await Logger.alert(
+				req,
+				400,
+				"Dati della votazione mancanti (meetingId o voteIndex).",
 			);
 			return res
 				.status(400)
@@ -27,12 +25,10 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 				String(voteIndex),
 			]);
 		} catch (err) {
-			console.log(
-				formatLog(
-					req,
-					200,
-					`Nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Prima votazione consentita.`,
-				),
+			await Logger.signal(
+				req,
+				200,
+				`Nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Prima votazione consentita.`,
 			);
 			return next();
 		}
@@ -42,12 +38,10 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 			!Array.isArray(historyResult) ||
 			historyResult.length === 0
 		) {
-			console.log(
-				formatLog(
-					req,
-					200,
-					`Storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Voto consentito.`,
-				),
+			await Logger.signal(
+				req,
+				200,
+				`Storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Voto consentito.`,
 			);
 			return next();
 		}
@@ -79,12 +73,10 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 			const hashPartecipante = innerValue?.partecipante;
 
 			if (hashPartecipante === userHash) {
-				console.log(
-					formatLog(
-						req,
-						403,
-						`Voto duplicato rilevato per utente (hash: ${userHash}) su meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
-					),
+				await Logger.alert(
+					req,
+					403,
+					`Voto duplicato rilevato per utente (hash: ${userHash}) su meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
 				);
 				return res.status(403).json({
 					message:
@@ -93,21 +85,17 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 			}
 		}
 
-		console.log(
-			formatLog(
-				req,
-				200,
-				`Nessun voto precedente rilevato per utente (hash: ${userHash}). Voto consentito.`,
-			),
+		await Logger.signal(
+			req,
+			200,
+			`Nessun voto precedente rilevato per utente (hash: ${userHash}). Voto consentito.`,
 		);
 		next();
 	} catch (error) {
-		console.error(
-			formatLog(
-				req,
-				500,
-				`Errore nel middleware checkIfAlreadyVoted: ${error.message}`,
-			),
+		await Logger.alert(
+			req,
+			500,
+			`Errore nel middleware checkIfAlreadyVoted: ${error.message}`,
 		);
 		return res.status(500).json({
 			message: "Errore di sistema durante la verifica del voto.",
