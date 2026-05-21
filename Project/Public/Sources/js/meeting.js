@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let isCEO = false;
 	try {
 		const roleResponse = await fetch(
-			"http://localhost:30000/api/v1/check-role",
+			"http://10.172.10.74:30000/api/v1/check-role",
 			{
 				method: "GET",
 				headers: {
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		try {
 			// Effettua la fetch alla rotta GET protetta
 			const response = await fetch(
-				`http://localhost:30000/api/v1/getVerbale/${meeting.id}`,
+				`http://10.172.10.74:30000/api/v1/getVerbale/${meeting.id}`,
 				{
 					method: "GET",
 					headers: {
@@ -167,7 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let votationsStatus = {};
 	try {
 		const statusResponse = await fetch(
-			`http://localhost:30000/api/v1/get-votations-status?meetingId=${meeting.id}`,
+			`http://10.172.10.74:30000/api/v1/get-votations-status?meetingId=${meeting.id}`,
 			{
 				method: "GET",
 				headers: {
@@ -258,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		try {
 			const res = await fetch(
-				"http://localhost:30000/api/v1/aggiorna-status",
+				"http://10.172.10.74:30000/api/v1/aggiorna-status",
 				{
 					method: "POST",
 					headers: {
@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 			if (nuovoStato === "closed") {
 				const valRes = await fetch(
-					"http://localhost:30000/api/v1/validation-vote",
+					"http://10.172.10.74:30000/api/v1/validation-vote",
 					{
 						method: "POST",
 						headers: {
@@ -310,7 +310,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	window.visualizzaRisultati = async function (meetingId, voteId) {
 		try {
 			const res = await fetch(
-				"http://localhost:30000/api/v1/visualize-vote",
+				"http://10.172.10.74:30000/api/v1/visualize-vote",
 				{
 					method: "POST",
 					headers: {

@@ -185,7 +185,7 @@
                 // Endpoint combinato da app.js (/api/v1/) e logger_route.js (/api/logs/history)
                 // Se apri la pagina HTML da locale (senza un server web), modifica l'URL aggiungendo l'host
                 // Esempio: const response = await fetch('http://localhost:3000/api/v1/api/logs/history');
-                const response = await fetch('http://localhost:30000/api/v1/logs/history');
+                const response = await fetch('http://0.0.0.0:30000/api/v1/logs/history');
 
                 if (!response.ok) {
                     throw new Error(`Errore HTTP: ${response.status}`);

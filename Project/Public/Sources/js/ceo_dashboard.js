@@ -42,7 +42,7 @@ async function fetchMeetingHistory(token) {
 	const historyList = document.querySelector(".history-list");
 	if (!historyList) return;
 
-	const SERVER_URL = "http://localhost:30000";
+	const SERVER_URL = "http://10.172.10.74:30000";
 
 	try {
 		// CHIAMATA UNICA ALLA NUOVA API SICURA

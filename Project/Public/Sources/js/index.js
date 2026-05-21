@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
 				const user = JSON.parse(userDataString);
 
 				const response = await fetch(
-					"http://localhost:30000/api/v1/loginCheck",
+					"http://10.172.10.74:30000/api/v1/loginCheck",
 					{
 						method: "POST",
 						headers: {

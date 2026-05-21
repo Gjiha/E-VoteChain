@@ -75,7 +75,7 @@ window.vaiADettaglioRiunione = function (meetingId) {
 
 async function fetchAllMeetingHistory(userEmail, isCEO, token) {
 	const tableBody = document.getElementById("auditTableBody");
-	const SERVER_URL = "http://localhost:30000";
+	const SERVER_URL = "http://10.172.10.74:30000";
 
 	try {
 		// --- CHIAMATA UNICA ALLA NUOVA ROTTA CON IL JWT ---

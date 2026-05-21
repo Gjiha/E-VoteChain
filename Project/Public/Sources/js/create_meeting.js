@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 				// Step 1: Upload e salvataggio su Blockchain
 				const uploadRes = await fetch(
-					"http://localhost:30000/api/v1/uploadVerbale",
+					"http://10.172.10.74:30000/api/v1/uploadVerbale",
 					{
 						method: "POST",
 						headers: {
@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 				// Step 2: Creazione record riunione
 				const addRes = await fetch(
-					"http://localhost:30000/api/v1/create-meeting",
+					"http://10.172.10.74:30000/api/v1/create-meeting",
 					{
 						method: "POST",
 						headers: {

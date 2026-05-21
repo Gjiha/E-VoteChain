@@ -14,7 +14,7 @@ async function handleLogin(e) {
 
 	try {
 		const response = await fetch(
-			"http://localhost:30000/api/v1/loginCheck", // CORRETTO: 3000 invece di 30000
+			"http://10.172.10.74:30000/api/v1/loginCheck", // CORRETTO: 3000 invece di 30000
 			{
 				method: "POST",
 				headers: {

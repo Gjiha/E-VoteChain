@@ -137,7 +137,7 @@ router.post("/addUser", verifyToken, isCeoOrAdmin, async (req, res) => {
 				`Tentativo di registrazione fallito: email ${email} già in uso`,
 			);
 			return res.status(400).json({
-				message: "Un utente con questa email è già registrato.",
+				message: "Errore sull'inserimento dei dati.",
 			});
 		}
 

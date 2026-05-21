@@ -13,9 +13,7 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 				400,
 				"Dati della votazione mancanti (meetingId o voteIndex).",
 			);
-			return res
-				.status(400)
-				.json({ message: "Dati della votazione mancanti." });
+			return res.status(400).json({ message: "Dati mancanti." });
 		}
 
 		let historyResult;
@@ -79,8 +77,7 @@ const checkIfAlreadyVoted = async (req, res, next) => {
 					`Voto duplicato rilevato per utente (hash: ${userHash}) su meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
 				);
 				return res.status(403).json({
-					message:
-						"Voto rifiutato: Hai già espresso la tua preferenza per questa votazione.",
+					message: "Voto rifiutato.",
 				});
 			}
 		}

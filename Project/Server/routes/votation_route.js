@@ -16,9 +16,7 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 				400,
 				"get-votations-status fallita: parametro meetingId mancante.",
 			);
-			return res
-				.status(400)
-				.json({ message: "Parametro meetingId mancante." });
+			return res.status(400).json({ message: "Parametro mancante." });
 		}
 
 		const reunionAnswer = await getKV("Reunion", meetingId);
@@ -232,11 +230,9 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 				400,
 				`add-vote fallita: parametri mancanti. meetingId: ${meetingId}, voteIndex: ${voteIndex}, voto: ${voto}.`,
 			);
-			return res
-				.status(400)
-				.json({
-					message: "Dati mancanti (meetingId, voteIndex, voto).",
-				});
+			return res.status(400).json({
+				message: "Dati mancanti (meetingId, voteIndex, voto).",
+			});
 		}
 		if (!userEmail) {
 			await Logger.alert(
@@ -244,9 +240,7 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 				400,
 				"add-vote fallita: email utente mancante nel token.",
 			);
-			return res
-				.status(400)
-				.json({ message: "Email utente mancante nel token." });
+			return res.status(400).json({ message: "Errore token." });
 		}
 
 		const reunionAnswer = await getKV("Reunion", meetingId);
@@ -282,12 +276,10 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 				403,
 				`add-vote negata: utente ${userEmail} non autorizzato a votare per meetingId: ${meetingId}.`,
 			);
-			return res
-				.status(403)
-				.json({
-					message:
-						"Accesso negato: non sei autorizzato a votare in questa riunione.",
-				});
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei autorizzato a votare in questa riunione.",
+			});
 		}
 
 		const tableAnswer = await getKV("User", "table");
@@ -308,11 +300,9 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 				404,
 				`add-vote fallita: utente ${userEmail} non trovato nella tabella blockchain.`,
 			);
-			return res
-				.status(404)
-				.json({
-					message: "Utente non trovato nella tabella blockchain.",
-				});
+			return res.status(404).json({
+				message: "Utente non trovato nella tabella blockchain.",
+			});
 		}
 
 		const userAnswer = await getKV("User", String(userId));
@@ -329,11 +319,9 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 				404,
 				`add-vote fallita: quota non trovata per userId: ${userId}.`,
 			);
-			return res
-				.status(404)
-				.json({
-					message: "Quota utente non trovata sulla blockchain.",
-				});
+			return res.status(404).json({
+				message: "Quota utente non trovata sulla blockchain.",
+			});
 		}
 
 		const quota = parseFloat(userData.quota) || 0;
@@ -413,11 +401,9 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 				404,
 				`validation-vote: nessuno storico trovato per meetingId: ${meetingId}, voteIndex: ${voteIndex}.`,
 			);
-			return res
-				.status(404)
-				.json({
-					message: "Nessuno storico trovato per questa votazione.",
-				});
+			return res.status(404).json({
+				message: "Nessuno storico trovato per questa votazione.",
+			});
 		}
 
 		if (
@@ -430,11 +416,9 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 				200,
 				`validation-vote: storico vuoto per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Niente da validare.`,
 			);
-			return res
-				.status(200)
-				.json({
-					message: "Nessun voto registrato, niente da validare.",
-				});
+			return res.status(200).json({
+				message: "Nessun voto registrato, niente da validare.",
+			});
 		}
 
 		let sommaTotale = 0;
@@ -495,11 +479,9 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 				500,
 				`Impossibile salvare il risultato finale per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Dettaglio: ${saveError.message}`,
 			);
-			return res
-				.status(500)
-				.json({
-					message: "Errore durante il salvataggio del risultato.",
-				});
+			return res.status(500).json({
+				message: "Errore durante il salvataggio del risultato.",
+			});
 		}
 
 		await Logger.signal(
@@ -507,23 +489,19 @@ router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
 			200,
 			`Scrutinio completato per meetingId: ${meetingId}, voteIndex: ${voteIndex}. Esito: ${sommaTotale}, Favorevoli: ${countFavorevoli}, Contrari: ${countContrari}, Astenuti: ${countAstenuti}.`,
 		);
-		return res
-			.status(200)
-			.json({
-				message:
-					"Scrutinio completato e sigillato con successo sulla blockchain.",
-			});
+		return res.status(200).json({
+			message:
+				"Scrutinio completato e sigillato con successo sulla blockchain.",
+		});
 	} catch (error) {
 		await Logger.alert(
 			req,
 			500,
 			`Errore durante la validazione dei voti: ${error.message}`,
 		);
-		return res
-			.status(500)
-			.json({
-				message: "Errore interno del server durante la validazione.",
-			});
+		return res.status(500).json({
+			message: "Errore interno del server durante la validazione.",
+		});
 	}
 });
 
@@ -576,12 +554,10 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 				403,
 				`visualize-vote negata: utente ${userEmail} non è partecipante della riunione ${meetingId}.`,
 			);
-			return res
-				.status(403)
-				.json({
-					message:
-						"Accesso negato: non sei un partecipante di questa riunione.",
-				});
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei un partecipante di questa riunione.",
+			});
 		}
 
 		const voteAnswer = await getKV("Votation", [
@@ -639,12 +615,10 @@ router.post("/visualize-vote", verifyToken, async (req, res) => {
 			500,
 			`Errore nel recupero dei risultati: ${err.message}`,
 		);
-		return res
-			.status(500)
-			.json({
-				message:
-					"Errore interno del server durante il recupero dei risultati.",
-			});
+		return res.status(500).json({
+			message:
+				"Errore interno del server durante il recupero dei risultati.",
+		});
 	}
 });
 

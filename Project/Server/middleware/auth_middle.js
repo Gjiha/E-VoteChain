@@ -8,9 +8,7 @@ const verifyToken = async (req, res, next) => {
 
 	if (!token) {
 		await Logger.alert(req, 401, "Token mancante. Accesso negato.");
-		return res
-			.status(401)
-			.json({ message: "Token mancante. Accesso negato." });
+		return res.status(401).json({ message: "Accesso negato." });
 	}
 
 	try {
@@ -23,16 +21,14 @@ const verifyToken = async (req, res, next) => {
 			403,
 			`Token non valido o scaduto. Dettaglio: ${err.message}`,
 		);
-		return res.status(403).json({ message: "Token non valido o scaduto." });
+		return res.status(403).json({ message: "Accesso negato." });
 	}
 };
 
 const isCeoOrAdmin = async (req, res, next) => {
 	if (!req.user || !req.user.classe) {
 		await Logger.alert(req, 403, "Dati utente o ruolo mancanti nel token.");
-		return res
-			.status(403)
-			.json({ message: "Dati utente o ruolo mancanti nel token." });
+		return res.status(403).json({ message: "Accesso negato." });
 	}
 
 	const roleString = String(req.user.classe).toUpperCase().trim();
@@ -47,8 +43,7 @@ const isCeoOrAdmin = async (req, res, next) => {
 			`Accesso negato. Ruolo insufficiente: ${roleString} (wallet: ${req.user.id_wallet})`,
 		);
 		return res.status(403).json({
-			message:
-				"Accesso negato. Privilegi insufficienti per questa operazione.",
+			message: "Accesso negato.",
 		});
 	}
 };
@@ -65,18 +60,14 @@ const quickTokenCheck = async (req, res, next) => {
 				200,
 				`Token verificato con successo (bypass blockchain) per wallet: ${decoded.id_wallet}`,
 			);
-			return res
-				.status(200)
-				.json({ message: "Token valido, accesso consentito." });
+			return res.status(200).json({ message: "Accesso consentito." });
 		} catch (jwtError) {
 			await Logger.alert(
 				req,
 				401,
 				`Token scaduto o non valido. Dettaglio: ${jwtError.message}`,
 			);
-			return res
-				.status(401)
-				.json({ message: "Token scaduto o non valido." });
+			return res.status(401).json({ message: "Accesso Negato." });
 		}
 	}
 

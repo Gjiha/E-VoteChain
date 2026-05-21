@@ -32,7 +32,7 @@ const fetchUserFromBlockchain = async (req, res, next) => {
 					`Email non registrata nella blockchain: ${email}`,
 				);
 				return res.status(404).json({
-					message: `L'email ${email} non è registrata nel sistema blockchain.`,
+					message: `Errore sulla richiesta utente dalla blockchain.`,
 				});
 			}
 
@@ -65,8 +65,7 @@ const fetchUserFromBlockchain = async (req, res, next) => {
 				`Nessun dato utente trovato sulla blockchain per id_wallet: ${targetId}`,
 			);
 			return res.status(404).json({
-				message:
-					"Dati utente non trovati sulla blockchain per l'ID risolto.",
+				message: "Dati utente non trovati sulla blockchain.",
 			});
 		}
 

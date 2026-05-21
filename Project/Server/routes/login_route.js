@@ -30,7 +30,7 @@ router.post(
 					400,
 					`Login fallito per identificativo: ${identificativo}. Password mancante.`,
 				);
-				return res.status(400).json({ message: "Password mancante" });
+				return res.status(400).json({ message: "Dati errati" });
 			}
 
 			const match = await bcrypt.compare(psw, utente.psw);
@@ -64,7 +64,7 @@ router.post(
 					401,
 					`Login fallito per identificativo: ${identificativo}. Password errata.`,
 				);
-				return res.status(401).json({ message: "Password errata" });
+				return res.status(401).json({ message: "Dati errati" });
 			}
 		} catch (err) {
 			await Logger.alert(

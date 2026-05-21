@@ -1,20 +1,32 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
+const path = require("path"); // Necessario per estrarre l'estensione del file
 const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
 const { addKV, getKV } = require("../mapping/mapping.js");
 
 const Logger = require("../utils/logger_utils.js");
+
+// --- CONFIGURAZIONE WHITELIST PDF ---
+const ALLOWED_MIMETYPES = ["application/pdf"];
+const ALLOWED_EXTENSIONS = [".pdf"];
 
 const storage = multer.memoryStorage();
 const upload = multer({
 	storage: storage,
 	limits: { fileSize: 50 * 1024 * 1024 },
 	fileFilter: (req, file, cb) => {
-		if (file.mimetype === "application/pdf") {
+		// 1. Controllo del MimeType
+		const isAllowedMimetype = ALLOWED_MIMETYPES.includes(file.mimetype);
+
+		// 2. Controllo dell'Estensione originale
+		const fileExtension = path.extname(file.originalname).toLowerCase();
+		const isAllowedExtension = ALLOWED_EXTENSIONS.includes(fileExtension);
+
+		if (isAllowedMimetype && isAllowedExtension) {
 			cb(null, true);
 		} else {
-			cb(new Error("TIPO_FILE_NON_VALIDO"), false);
+			cb(new Error("TIPO_FILE_NON_VALIDO_SOLO_PDF_CONSENTITI"), false);
 		}
 	},
 });
@@ -38,6 +50,24 @@ router.post(
 					.status(400)
 					.json({ message: "File PDF mancante nel caricamento." });
 			}
+
+			// 3. Controllo del Magic Number (Firma del File)
+			// I file PDF iniziano con "%PDF" (Esadecimale: 25 50 44 46)
+			const fileHeader = req.file.buffer.toString("hex", 0, 4);
+			if (fileHeader !== "25504446") {
+				await Logger.alert(
+					req,
+					400,
+					`Upload verbale fallito: contenuto file manipolato o non PDF. Firma esadecimale rilevata: ${fileHeader}`,
+				);
+				return res
+					.status(400)
+					.json({
+						message:
+							"Il file caricato non è un PDF autentico o risulta corrotto.",
+					});
+			}
+
 			if (!meetingId) {
 				await Logger.alert(
 					req,
@@ -64,6 +94,19 @@ router.post(
 				result: bcResponse,
 			});
 		} catch (err) {
+			// Gestione specifica dell'errore di validazione di Multer
+			if (err.message === "TIPO_FILE_NON_VALIDO_SOLO_PDF_CONSENTITI") {
+				await Logger.alert(
+					req,
+					415,
+					`Tentativo di upload fallito: tipo file non supportato.`,
+				);
+				return res.status(415).json({
+					message:
+						"Formato non supportato. Si accettano esclusivamente file PDF.",
+				});
+			}
+
 			await Logger.alert(
 				req,
 				500,

@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let votationsStatus = {};
 	try {
 		const statusResponse = await fetch(
-			`http://localhost:30000/api/v1/get-votations-status?meetingId=${meetingId}`,
+			`http://10.172.10.74:30000/api/v1/get-votations-status?meetingId=${meetingId}`,
 			{
 				method: "GET",
 				headers: {
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const docBox = document.getElementById("roomDocBox");
 				const docLink = document.getElementById("roomDocLink");
 				docBox.style.display = "flex";
-				docLink.href = "http://localhost:30000" + meeting.verbale;
+				docLink.href = "http://10.172.10.74:30000" + meeting.verbale;
 			}
 		}
 	}
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 		try {
 			// Eseguiamo la chiamata all'API add-vote
 			const response = await fetch(
-				"http://localhost:30000/api/v1/add-vote",
+				"http://10.172.10.74:30000/api/v1/add-vote",
 				{
 					method: "POST",
 					headers: {

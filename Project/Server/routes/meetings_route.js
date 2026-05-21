@@ -17,9 +17,7 @@ router.get("/meetings", verifyToken, async (req, res) => {
 				400,
 				"Recupero riunioni fallito: email utente mancante nel token.",
 			);
-			return res
-				.status(400)
-				.json({ message: "Email utente mancante nel token" });
+			return res.status(400).json({ message: "Errore Token" });
 		}
 
 		const keysAnswer = await getKeysCopy("Reunion");
