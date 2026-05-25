@@ -60,12 +60,10 @@ router.post(
 					400,
 					`Upload verbale fallito: contenuto file manipolato o non PDF. Firma esadecimale rilevata: ${fileHeader}`,
 				);
-				return res
-					.status(400)
-					.json({
-						message:
-							"Il file caricato non è un PDF autentico o risulta corrotto.",
-					});
+				return res.status(400).json({
+					message:
+						"Il file caricato non è un PDF autentico o risulta corrotto.",
+				});
 			}
 
 			if (!meetingId) {
@@ -124,6 +122,11 @@ router.get("/getVerbale/:id_reunion", verifyToken, async (req, res) => {
 	try {
 		const { id_reunion } = req.params;
 
+		// 1. Estrazione dati utente dal token
+		const userEmail = req.user.email;
+		const userRole = String(req.user.classe).toUpperCase().trim();
+		const isCEO = userRole === "CEO";
+
 		if (!id_reunion) {
 			await Logger.alert(
 				req,
@@ -135,6 +138,45 @@ router.get("/getVerbale/:id_reunion", verifyToken, async (req, res) => {
 				.json({ message: "ID riunione non specificato." });
 		}
 
+		// 2. Controllo Autorizzativo sui Partecipanti
+		const reunionAnswer = await getKV("Reunion", id_reunion);
+		let meetingData = reunionAnswer?.value;
+
+		if (typeof meetingData === "string") {
+			try {
+				meetingData = JSON.parse(meetingData);
+			} catch (e) {
+				await Logger.alert(
+					req,
+					500,
+					`Errore parsing dati riunione per id_reunion: ${id_reunion}.`,
+				);
+			}
+		}
+
+		if (!meetingData) {
+			await Logger.alert(
+				req,
+				404,
+				`Verbale negato: riunione non trovata per id_reunion: ${id_reunion}.`,
+			);
+			return res.status(404).json({ message: "Riunione non trovata." });
+		}
+
+		const partecipanti = meetingData.partecipanti || [];
+		if (!isCEO && !partecipanti.includes(userEmail)) {
+			await Logger.alert(
+				req,
+				403,
+				`Accesso al verbale negato: utente ${userEmail} non è partecipante della riunione ${id_reunion}.`,
+			);
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei un partecipante di questa riunione.",
+			});
+		}
+
+		// 3. Recupero effettivo del Verbale
 		const result = await getKV("Verbale", id_reunion);
 
 		if (!result) {

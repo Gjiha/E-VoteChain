@@ -10,6 +10,12 @@ const Logger = require("../utils/logger_utils.js");
 router.get("/get-votations-status", verifyToken, async (req, res) => {
 	try {
 		const meetingId = req.query.meetingId;
+
+		// 1. Estrazione dati utente dal token
+		const userEmail = req.user.email;
+		const userRole = String(req.user.classe).toUpperCase().trim();
+		const isCEO = userRole === "CEO";
+
 		if (!meetingId) {
 			await Logger.alert(
 				req,
@@ -19,6 +25,7 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 			return res.status(400).json({ message: "Parametro mancante." });
 		}
 
+		// 2. Recupero dati della riunione
 		const reunionAnswer = await getKV("Reunion", meetingId);
 		let meetingData = reunionAnswer?.value;
 
@@ -34,9 +41,33 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 			}
 		}
 
+		// 3. Controllo Autorizzativo sui Partecipanti
+		if (!meetingData) {
+			await Logger.alert(
+				req,
+				404,
+				`get-votations-status negato: riunione non trovata per meetingId: ${meetingId}.`,
+			);
+			return res.status(404).json({ message: "Riunione non trovata." });
+		}
+
+		const partecipanti = meetingData.partecipanti || [];
+		if (!isCEO && !partecipanti.includes(userEmail)) {
+			await Logger.alert(
+				req,
+				403,
+				`Accesso allo status votazioni negato: utente ${userEmail} non è partecipante della riunione ${meetingId}.`,
+			);
+			return res.status(403).json({
+				message:
+					"Accesso negato: non sei un partecipante di questa riunione.",
+			});
+		}
+
+		// 4. Logica di chiusura della riunione (resto invariato)
 		const now = new Date();
 		let isMeetingEnded = false;
-		if (meetingData && meetingData.dataFine) {
+		if (meetingData.dataFine) {
 			const end = new Date(meetingData.dataFine);
 			if (now > end) {
 				isMeetingEnded = true;

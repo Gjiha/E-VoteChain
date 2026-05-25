@@ -38,7 +38,7 @@ app.use(express.static(path.join(__dirname, "../Public")));
 
 app.use(
 	cors({
-		origin: "http://0.0.0.0:3000",
+		origin: "http://0.0.0.0:30000",
 		credentials: true, // FONDAMENTALE per ricevere e inviare i cookie
 	}),
 );
