@@ -4,11 +4,9 @@ window.accediVotazione = function (meetingId, voteId) {};
 window.visualizzaRisultati = async function (meetingId, voteId) {};
 
 document.addEventListener("DOMContentLoaded", async () => {
-	// 1. Setup Utente e Token
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -23,15 +21,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	// 2. VERIFICA RUOLO SICURA TRAMITE SERVER (JWT)
 	let isCEO = false;
 	try {
-		const roleResponse = await fetch(
-			"http://10.172.10.74:30000/api/v1/check-role",
-			{
-				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-			},
-		);
+		const roleResponse = await fetch("/api/v1/check-role", {
+			method: "GET",
+			credentials: "include",
+		});
 
 		if (roleResponse.status === 401 || roleResponse.status === 403) {
 			alert("Sessione scaduta o non valida.");
@@ -96,15 +89,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		try {
 			// Effettua la fetch alla rotta GET protetta
-			const response = await fetch(
-				`http://10.172.10.74:30000/api/v1/getVerbale/${meeting.id}`,
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${token}`,
-					},
-				},
-			);
+			const response = await fetch(`/api/v1/getVerbale/${meeting.id}`, {
+				method: "GET",
+				credentials: "include",
+			});
 
 			if (!response.ok) {
 				const errData = await response.json().catch(() => ({}));
@@ -167,12 +155,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let votationsStatus = {};
 	try {
 		const statusResponse = await fetch(
-			`http://10.172.10.74:30000/api/v1/get-votations-status?meetingId=${meeting.id}`,
+			`/api/v1/get-votations-status?meetingId=${meeting.id}`,
 			{
 				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
+				credentials: "include",
 			},
 		);
 
@@ -257,38 +243,33 @@ document.addEventListener("DOMContentLoaded", async () => {
 		votationsStatus[voteId] = nuovoStato;
 
 		try {
-			const res = await fetch(
-				"http://10.172.10.74:30000/api/v1/aggiorna-status",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`,
-					},
-					body: JSON.stringify({
-						meetingId: meeting.id,
-						votationsStatus: votationsStatus,
-					}),
+			const res = await fetch("/api/v1/aggiorna-status", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			);
+
+				body: JSON.stringify({
+					meetingId: meeting.id,
+					votationsStatus: votationsStatus,
+				}),
+			});
 
 			if (!res.ok) throw new Error("Errore API aggiorna-status");
 
 			if (nuovoStato === "closed") {
-				const valRes = await fetch(
-					"http://10.172.10.74:30000/api/v1/validation-vote",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${token}`,
-						},
-						body: JSON.stringify({
-							meetingId: meeting.id,
-							voteIndex: voteId,
-						}),
+				const valRes = await fetch("/api/v1/validation-vote", {
+					method: "POST",
+					credentials: "include",
+					headers: {
+						"Content-Type": "application/json",
 					},
-				);
+					body: JSON.stringify({
+						meetingId: meeting.id,
+						voteIndex: voteId,
+					}),
+				});
 
 				if (valRes.ok) {
 					await window.visualizzaRisultati(meeting.id, voteId);
@@ -309,20 +290,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 	window.visualizzaRisultati = async function (meetingId, voteId) {
 		try {
-			const res = await fetch(
-				"http://10.172.10.74:30000/api/v1/visualize-vote",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`,
-					},
-					body: JSON.stringify({
-						meetingId: meetingId,
-						voteIndex: voteId,
-					}),
+			const res = await fetch("/api/v1/visualize-vote", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			);
+				body: JSON.stringify({
+					meetingId: meetingId,
+					voteIndex: voteId,
+				}),
+			});
 
 			if (!res.ok) {
 				const errorData = await res.json();
@@ -338,8 +316,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 		}
 	};
 
-	window.handleLogout = function () {
-		localStorage.clear();
-		window.location.href = "login.html";
+	window.handleLogout = async function () {
+		try {
+			// Invia la richiesta al backend per cancellare il cookie jwt
+			await fetch("http://10.172.10.74:3000/api/v1/logout", {
+				method: "POST",
+				credentials: "include", // Permette l'invio del cookie da rimuovere
+			});
+		} catch (error) {
+			console.error("Errore durante il logout dal server:", error);
+		} finally {
+			// In ogni caso, pulisci il localStorage lato client e reindirizza
+			localStorage.clear();
+			window.location.href = "login.html";
+		}
 	};
 });

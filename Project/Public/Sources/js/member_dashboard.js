@@ -22,11 +22,9 @@ window.vaiADettaglioRiunione = function (meetingId) {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Inizializziamo il profilo utente e il TOKEN
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -41,26 +39,22 @@ document.addEventListener("DOMContentLoaded", () => {
 			user.nome[0] + user.cognome[0]
 		).toUpperCase();
 
-	// 2. Lanciamo il recupero dello storico passando solo il token
-	fetchMeetingHistory(token);
+	fetchMeetingHistory();
 });
 
-async function fetchMeetingHistory(token) {
+async function fetchMeetingHistory() {
 	const historyList = document.querySelector(".history-list");
 	if (!historyList) return;
 
-	const SERVER_URL = "http://10.172.10.74:30000";
+	const SERVER_URL = "";
 
 	try {
 		// CHIAMATA UNICA ALLA NUOVA API SICURA
 		const response = await fetch(`${SERVER_URL}/api/v1/meetings`, {
 			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
+			credentials: "include",
 		});
 
-		// Gestione token scaduto o non valido
 		if (response.status === 401 || response.status === 403) {
 			alert("Sessione scaduta. Effettua nuovamente il login.");
 			localStorage.clear();

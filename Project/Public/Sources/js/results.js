@@ -1,11 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Controllo base sicurezza
-	const token = localStorage.getItem("token");
-	if (!token) {
-		window.location.href = "login.html";
-		return;
-	}
-
 	// 2. Lettura parametri URL (es. ?id=reunion_123&vote=1)
 	const urlParams = new URLSearchParams(window.location.search);
 	const meetingId = urlParams.get("id");

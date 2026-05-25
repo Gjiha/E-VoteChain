@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 	// 1. Validazione sessione e ruolo (Identica a manage_users.js)
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -59,17 +58,14 @@ document.addEventListener("DOMContentLoaded", () => {
 		statusDiv.innerText = "Salvataggio sulla Blockchain...";
 
 		try {
-			const response = await fetch(
-				"http://10.172.10.74:30000/api/v1/addUser",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`,
-					},
-					body: JSON.stringify(newUser),
+			const response = await fetch("/api/v1/addUser", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			);
+				body: JSON.stringify(newUser),
+			});
 
 			const data = await response.json();
 

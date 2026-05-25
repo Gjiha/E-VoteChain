@@ -1,13 +1,10 @@
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Setup Utente (Header), recupero Ruolo/Email e TOKEN
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token"); // <-- Recupero del JWT
 
 	let userEmail = null;
 	let userRole = null;
 
-	// Se manca l'utente o il token, rimandiamo subito al login
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -44,8 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			`window.location.href='${dashboardLink}'`,
 		);
 
-	// 2. Avvia il recupero passando l'email, il flag CEO e IL TOKEN
-	fetchAllMeetingHistory(userEmail, isCEO, token);
+	fetchAllMeetingHistory(userEmail, isCEO);
 });
 
 // Funzione di supporto per formattare la data
@@ -73,20 +69,17 @@ window.vaiADettaglioRiunione = function (meetingId) {
 	}
 };
 
-async function fetchAllMeetingHistory(userEmail, isCEO, token) {
+async function fetchAllMeetingHistory(userEmail, isCEO) {
 	const tableBody = document.getElementById("auditTableBody");
-	const SERVER_URL = "http://10.172.10.74:30000";
+	const SERVER_URL = "";
 
 	try {
 		// --- CHIAMATA UNICA ALLA NUOVA ROTTA CON IL JWT ---
 		const response = await fetch(`${SERVER_URL}/api/v1/meetings`, {
 			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
+			credentials: "include",
 		});
 
-		// Gestione token scaduto o non valido
 		if (response.status === 401 || response.status === 403) {
 			alert("Sessione scaduta. Effettua nuovamente il login.");
 			localStorage.clear();

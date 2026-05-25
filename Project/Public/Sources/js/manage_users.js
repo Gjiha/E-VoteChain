@@ -1,11 +1,9 @@
 let globalUsers = []; // Variabile globale per memorizzare gli utenti scaricati
 
 document.addEventListener("DOMContentLoaded", () => {
-	// 1. Inizializziamo il profilo utente e il TOKEN
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -45,18 +43,16 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 
 	// 3. Avvia il recupero degli utenti
-	fetchAllUsers(token);
+	fetchAllUsers();
 });
 
 async function fetchAllUsers(token) {
-	const SERVER_URL = "http://10.172.10.74:30000";
+	const SERVER_URL = "";
 
 	try {
 		const response = await fetch(`${SERVER_URL}/api/v1/all-users`, {
 			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-			},
+			credentials: "include",
 		});
 
 		if (response.status === 401 || response.status === 403) {

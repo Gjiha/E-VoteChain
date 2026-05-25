@@ -3,8 +3,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const Logger = require("../utils/logger_utils.js");
 
 const verifyToken = async (req, res, next) => {
-	const authHeader = req.headers["authorization"];
-	const token = authHeader && authHeader.split(" ")[1];
+	const token = req.cookies.jwt;
 
 	if (!token) {
 		await Logger.alert(req, 401, "Token mancante. Accesso negato.");
@@ -21,6 +20,8 @@ const verifyToken = async (req, res, next) => {
 			403,
 			`Token non valido o scaduto. Dettaglio: ${err.message}`,
 		);
+
+		res.clearCookie("jwt");
 		return res.status(403).json({ message: "Accesso negato." });
 	}
 };
@@ -49,24 +50,29 @@ const isCeoOrAdmin = async (req, res, next) => {
 };
 
 const quickTokenCheck = async (req, res, next) => {
-	const authHeader = req.headers["authorization"];
-	const tokenFromHeader = authHeader && authHeader.split(" ")[1];
+	const tokenFromCookie = req.cookies.jwt;
 
-	if (tokenFromHeader) {
+	if (tokenFromCookie) {
 		try {
-			const decoded = jwt.verify(tokenFromHeader, JWT_SECRET);
+			const decoded = jwt.verify(tokenFromCookie, JWT_SECRET);
 			await Logger.signal(
 				req,
 				200,
 				`Token verificato con successo (bypass blockchain) per wallet: ${decoded.id_wallet}`,
 			);
-			return res.status(200).json({ message: "Accesso consentito." });
+
+			// MODIFICA QUI: Ora restituiamo anche i dati estratti dal token
+			return res.status(200).json({
+				message: "Accesso consentito.",
+				data: decoded, // Questo contiene id_wallet, classe ed email
+			});
 		} catch (jwtError) {
 			await Logger.alert(
 				req,
 				401,
 				`Token scaduto o non valido. Dettaglio: ${jwtError.message}`,
 			);
+			res.clearCookie("jwt");
 			return res.status(401).json({ message: "Accesso Negato." });
 		}
 	}

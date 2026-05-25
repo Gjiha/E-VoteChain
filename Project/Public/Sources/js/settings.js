@@ -22,7 +22,16 @@ document.addEventListener("DOMContentLoaded", () => {
 	}
 });
 
-function handleLogout() {
-	localStorage.clear();
-	window.location.href = "login.html";
+async function handleLogout() {
+	try {
+		await fetch("/api/v1/logout", {
+			method: "POST",
+			credentials: "include",
+		});
+	} catch (error) {
+		console.error("Errore durante la disconnessione dal server:", error);
+	} finally {
+		localStorage.clear();
+		window.location.href = "login.html";
+	}
 }

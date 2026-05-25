@@ -13,22 +13,18 @@ async function handleLogin(e) {
 	msg.innerText = "";
 
 	try {
-		const response = await fetch(
-			"http://10.172.10.74:30000/api/v1/loginCheck", // CORRETTO: 3000 invece di 30000
-			{
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-					// RIMOSSO l'header Authorization: qui non serve, stiamo facendo il login con la password!
-				},
-				body: JSON.stringify({
-					id_wallet: walletValue,
-					psw: pswValue,
-				}),
+		const response = await fetch("/api/v1/loginCheck", {
+			method: "POST",
+			credentials: "include", // FONDAMENTALE: permette di ricevere e salvare il cookie
+			headers: {
+				"Content-Type": "application/json",
 			},
-		);
+			body: JSON.stringify({
+				id_wallet: walletValue,
+				psw: pswValue,
+			}),
+		});
 
-		// LEGGIAMO IL JSON UNA SOLA VOLTA QUI
 		const result = await response.json();
 
 		if (response.ok) {
@@ -36,26 +32,32 @@ async function handleLogin(e) {
 			msg.style.color = "green";
 			msg.innerText = "Login effettuato! Reindirizzamento...";
 
-			// 1. Salviamo il TOKEN JWT
-			if (result.token) {
-				localStorage.setItem("token", result.token);
+			// Recuperiamo i dati in modo sicuro (dal server se ci sono)
+			const userData = result.data;
+
+			if (userData) {
+				// Aggiorniamo il localStorage con i dati freschi
+				localStorage.setItem("user", JSON.stringify(userData));
+
+				// Normalizziamo il controllo della classe/ruolo per evitare altri errori
+				const ruoloRaw = String(
+					userData.classe || userData.ruolo || "",
+				).toLowerCase();
+
+				setTimeout(() => {
+					if (ruoloRaw.includes("ceo")) {
+						window.location.href = "ceo_dashboard.html";
+					} else {
+						window.location.href = "member_dashboard.html";
+					}
+				}, 1000);
+			} else {
+				msg.style.color = "red";
+				msg.innerText =
+					"Errore anomalo: Dati utente mancanti dal server.";
 			}
-
-			// 2. Salviamo i DATI UTENTE
-			localStorage.setItem("user", JSON.stringify(result.data));
-
-			const ruolo = result.data.classe.toLowerCase();
-
-			setTimeout(() => {
-				if (ruolo === "ceo") {
-					window.location.href = "ceo_dashboard.html";
-				} else {
-					window.location.href = "member_dashboard.html";
-				}
-			}, 1000);
 		} else {
 			// LOGIN FALLITO (Il server ha risposto con errore)
-			// Usiamo il messaggio che arriva dal JSON del server
 			msg.style.color = "red";
 			msg.innerText = result.message || "Errore durante il login";
 			console.log("Dettagli errore server:", result);

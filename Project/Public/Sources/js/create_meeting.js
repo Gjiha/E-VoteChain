@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
 	// 1. INIZIALIZZAZIONE E RECUPERO TOKEN
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -63,18 +62,12 @@ document.addEventListener("DOMContentLoaded", function () {
 				formData.append("meetingId", meetingKey); // L'ID usato come chiave su Blockchain
 
 				// Step 1: Upload e salvataggio su Blockchain
-				const uploadRes = await fetch(
-					"http://10.172.10.74:30000/api/v1/uploadVerbale",
-					{
-						method: "POST",
-						headers: {
-							Authorization: `Bearer ${token}`,
-							// Nota: Non impostare Content-Type con FormData, lo fa il browser
-						},
-						body: formData,
-						signal: controller.signal,
-					},
-				);
+				const uploadRes = await fetch("/api/v1/uploadVerbale", {
+					method: "POST",
+					credentials: "include",
+					body: formData,
+					signal: controller.signal,
+				});
 
 				if (!uploadRes.ok) {
 					const uploadData = await uploadRes.json().catch(() => ({}));
@@ -107,21 +100,19 @@ document.addEventListener("DOMContentLoaded", function () {
 				};
 
 				// Step 2: Creazione record riunione
-				const addRes = await fetch(
-					"http://10.172.10.74:30000/api/v1/create-meeting",
-					{
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							Authorization: `Bearer ${token}`,
-						},
-						signal: controller.signal,
-						body: JSON.stringify({
-							meetingKey: meetingKey,
-							meetingData: meetingData,
-						}),
+				const addRes = await fetch("/api/v1/create-meeting", {
+					method: "POST",
+					credentials: "include",
+
+					headers: {
+						"Content-Type": "application/json",
 					},
-				);
+					signal: controller.signal,
+					body: JSON.stringify({
+						meetingKey: meetingKey,
+						meetingData: meetingData,
+					}),
+				});
 
 				if (addRes.status === 401 || addRes.status === 403) {
 					throw new Error(
@@ -167,7 +158,16 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 });
 
-function handleLogout() {
-	localStorage.clear();
-	window.location.href = "login.html";
+async function handleLogout() {
+	try {
+		await fetch("http://10.172.10.74:3000/api/v1/logout", {
+			method: "POST",
+			credentials: "include",
+		});
+	} catch (error) {
+		console.error("Errore durante il logout dal server:", error);
+	} finally {
+		localStorage.clear();
+		window.location.href = "login.html";
+	}
 }

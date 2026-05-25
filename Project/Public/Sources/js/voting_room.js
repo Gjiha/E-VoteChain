@@ -1,9 +1,8 @@
 document.addEventListener("DOMContentLoaded", async () => {
 	// 1. Setup Utente e Sicurezza base
 	const userString = localStorage.getItem("user");
-	const token = localStorage.getItem("token");
 
-	if (!userString || !token) {
+	if (!userString) {
 		window.location.href = "login.html";
 		return;
 	}
@@ -27,12 +26,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 	let votationsStatus = {};
 	try {
 		const statusResponse = await fetch(
-			`http://10.172.10.74:30000/api/v1/get-votations-status?meetingId=${meetingId}`,
+			`/api/v1/get-votations-status?meetingId=${meetingId}`,
 			{
 				method: "GET",
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
+				credentials: "include",
 			},
 		);
 
@@ -88,7 +85,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 				const docBox = document.getElementById("roomDocBox");
 				const docLink = document.getElementById("roomDocLink");
 				docBox.style.display = "flex";
-				docLink.href = "http://10.172.10.74:30000" + meeting.verbale;
+				docLink.href = "" + meeting.verbale;
 			}
 		}
 	}
@@ -129,21 +126,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 		try {
 			// Eseguiamo la chiamata all'API add-vote
-			const response = await fetch(
-				"http://10.172.10.74:30000/api/v1/add-vote",
-				{
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`, // Il token autorizza e identifica l'utente
-					},
-					body: JSON.stringify({
-						meetingId: meetingId,
-						voteIndex: voteNumber,
-						voto: currentVote,
-					}),
+			const response = await fetch("/api/v1/add-vote", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/json",
 				},
-			);
+				body: JSON.stringify({
+					meetingId: meetingId,
+					voteIndex: voteNumber,
+					voto: currentVote,
+				}),
+			});
 
 			if (!response.ok) {
 				const errData = await response.json().catch(() => ({}));

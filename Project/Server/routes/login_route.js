@@ -48,14 +48,22 @@ router.post(
 
 				delete utente.psw;
 
+				res.cookie("jwt", newToken, {
+					httpOnly: true, // Illegibile da document.cookie (sicurezza contro XSS)
+					secure: false, // True solo in HTTPS (produzione)
+					sameSite: "lax",
+					maxAge: 2 * 60 * 60 * 1000, // Scadenza in millisecondi (es. 1 ora)
+				});
+
 				await Logger.signal(
 					req,
 					200,
 					`Login effettuato con successo per wallet: ${utente.id_wallet} (ruolo: ${utente.classe}).`,
 				);
+
+				// 2. RIMUIVI IL TOKEN DAL BODY DELLA RISPOSTA
 				return res.status(200).json({
 					message: "Login effettuato",
-					token: newToken,
 					data: utente,
 				});
 			} else {
@@ -78,5 +86,18 @@ router.post(
 		}
 	},
 );
+
+router.post("/logout", async (req, res) => {
+	// Pulisce il cookie contenente il JWT
+	res.clearCookie("jwt", {
+		httpOnly: true,
+		secure: false, // Come impostato nel login
+		sameSite: "lax", // Come impostato nel login
+	});
+	e;
+	Logger.signal(req, 200, "Logout effettuato volontariamente dall'utente.");
+
+	return res.status(200).json({ message: "Logout completato con successo" });
+});
 
 module.exports = router;
