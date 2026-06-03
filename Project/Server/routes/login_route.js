@@ -43,7 +43,7 @@ router.post(
 				};
 
 				const newToken = jwt.sign(payload, JWT_SECRET, {
-					expiresIn: process.env.JWT_EXPIRES_IN || "1h",
+					expiresIn: process.env.JWT_EXPIRES_IN,
 				});
 
 				delete utente.psw;
@@ -94,7 +94,6 @@ router.post("/logout", async (req, res) => {
 		secure: false, // Come impostato nel login
 		sameSite: "lax", // Come impostato nel login
 	});
-	e;
 	Logger.signal(req, 200, "Logout effettuato volontariamente dall'utente.");
 
 	return res.status(200).json({ message: "Logout completato con successo" });

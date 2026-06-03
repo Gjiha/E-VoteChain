@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Monitoring Dashboard</title>
+    <link rel="stylesheet" href="Sources/css/logVisual.css">
+    <script defer src="Sources/js/logVisual.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <h1>API Monitoring 📡</h1>
+        <div class="controls">
+            <button id="btn-all" class="active" onclick="filterLogs('All')">Tutti</button>
+            <button id="btn-alert" onclick="filterLogs('Alert')">Solo Alert</button>
+            <button id="btn-signal" onclick="filterLogs('Signal')">Solo Signal</button>
+
+            <button id="btn-sort" onclick="toggleSort()" style="margin-left: 16px;">⬇️ Più recenti</button>
+
+            <button onclick="loadLogs()" style="border-color: #2196f3;">🔄 Aggiorna</button>
+            <button id="btn-analyze" onclick="analyzeSelectedLogs()">🧠 Analizza log</button>
+        </div>
+    </header>
+
+    <main class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Seleziona</th>
+                    <th>Tipo</th>
+                    <th>Timestamp</th>
+                    <th>Sorgente ➔ Destinazione</th>
+                    <th>Route</th>
+                    <th>Codice HTTP</th>
+                    <th>Commento</th>
+                </tr>
+            </thead>
+            <tbody id="log-table-body">
+                <tr>
+                    <td colspan="6" class="loading">Caricamento log in corso...</td>
+                </tr>
+            </tbody>
+        </table>
+    </main>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
+const { verifyToken, isCeo } = require("../middleware/auth_middle.js");
 const { addKV, getKV } = require("../mapping/mapping.js");
 
 // =========================================================
@@ -37,7 +37,7 @@ const upload = multer({
 router.post(
 	"/uploadVerbale",
 	verifyToken,
-	isCeoOrAdmin,
+	isCeo,
 	upload.single("verbale"),
 	async (req, res) => {
 		try {

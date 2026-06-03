@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path"); // Necessario per estrarre l'estensione del file
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
+const { verifyToken, isCeo } = require("../middleware/auth_middle.js");
 const { addKV, getKV } = require("../mapping/mapping.js");
 
 const Logger = require("../utils/logger_utils.js");
@@ -34,7 +34,7 @@ const upload = multer({
 router.post(
 	"/uploadVerbale",
 	verifyToken,
-	isCeoOrAdmin,
+	isCeo,
 	upload.single("verbale"),
 	async (req, res) => {
 		try {

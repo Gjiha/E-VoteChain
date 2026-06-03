@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
+const { verifyToken, isCeo } = require("../middleware/auth_middle.js");
 const { getKeysCopy, getKV, addKV } = require("../mapping/mapping.js");
 
 // =========================================================
@@ -103,7 +103,7 @@ router.get("/meetings", verifyToken, async (req, res) => {
 // =========================================================
 // NUOVA ROTTA: Crea una riunione (SOLO PER CEO/ADMIN)
 // =========================================================
-router.post("/create-meeting", verifyToken, isCeoOrAdmin, async (req, res) => {
+router.post("/create-meeting", verifyToken, isCeo, async (req, res) => {
 	try {
 		const { meetingKey, meetingData } = req.body;
 

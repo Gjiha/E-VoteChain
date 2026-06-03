@@ -15,7 +15,7 @@ async function handleLogin(e) {
 	try {
 		const response = await fetch("/api/v1/loginCheck", {
 			method: "POST",
-			credentials: "include", // FONDAMENTALE: permette di ricevere e salvare il cookie
+			credentials: "include",
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -28,24 +28,23 @@ async function handleLogin(e) {
 		const result = await response.json();
 
 		if (response.ok) {
-			// LOGIN SUCCESSO
 			msg.style.color = "green";
 			msg.innerText = "Login effettuato! Reindirizzamento...";
 
-			// Recuperiamo i dati in modo sicuro (dal server se ci sono)
 			const userData = result.data;
 
 			if (userData) {
-				// Aggiorniamo il localStorage con i dati freschi
 				localStorage.setItem("user", JSON.stringify(userData));
 
-				// Normalizziamo il controllo della classe/ruolo per evitare altri errori
 				const ruoloRaw = String(
 					userData.classe || userData.ruolo || "",
 				).toLowerCase();
 
+				// --- MODIFICA QUI: Aggiunto il controllo per l'ADMIN ---
 				setTimeout(() => {
-					if (ruoloRaw.includes("ceo")) {
+					if (ruoloRaw.includes("admin")) {
+						window.location.href = "logVisual.html";
+					} else if (ruoloRaw.includes("ceo")) {
 						window.location.href = "ceo_dashboard.html";
 					} else {
 						window.location.href = "member_dashboard.html";
@@ -57,7 +56,6 @@ async function handleLogin(e) {
 					"Errore anomalo: Dati utente mancanti dal server.";
 			}
 		} else {
-			// LOGIN FALLITO (Il server ha risposto con errore)
 			msg.style.color = "red";
 			msg.innerText = result.message || "Errore durante il login";
 			console.log("Dettagli errore server:", result);

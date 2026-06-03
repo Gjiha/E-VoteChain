@@ -1,0 +1,276 @@
+/* CSS: Stile della Dashboard */
+:root {
+	--bg-color: #121212;
+	--surface-color: #1e1e1e;
+	--text-primary: #ffffff;
+	--text-secondary: #b3b3b3;
+	--alert-color: #ff5252;
+	--signal-color: #4caf50;
+	--border-color: #333333;
+}
+
+body {
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+	background-color: var(--bg-color);
+	color: var(--text-primary);
+	margin: 0;
+	padding: 20px;
+}
+
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+	padding-bottom: 10px;
+	border-bottom: 1px solid var(--border-color);
+}
+
+h1 {
+	margin: 0;
+	font-size: 24px;
+	font-weight: 500;
+}
+
+.controls button {
+	background-color: var(--surface-color);
+	color: var(--text-primary);
+	border: 1px solid var(--border-color);
+	padding: 8px 16px;
+	margin-left: 8px;
+	border-radius: 4px;
+	cursor: pointer;
+	transition: background 0.2s;
+}
+
+.controls button:hover,
+.controls button.active {
+	background-color: #333;
+}
+
+.table-container {
+	background-color: var(--surface-color);
+	border-radius: 8px;
+	overflow-x: auto;
+	border: 1px solid var(--border-color);
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+}
+
+th,
+td {
+	padding: 12px 16px;
+	border-bottom: 1px solid var(--border-color);
+}
+
+th {
+	color: var(--text-secondary);
+	font-weight: 500;
+	font-size: 14px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+tbody tr:hover {
+	background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Badge colorati per i log */
+.badge {
+	padding: 4px 8px;
+	border-radius: 12px;
+	font-size: 12px;
+	font-weight: bold;
+	text-transform: uppercase;
+}
+
+.badge.alert {
+	background-color: rgba(255, 82, 82, 0.2);
+	color: var(--alert-color);
+}
+
+.badge.signal {
+	background-color: rgba(76, 175, 80, 0.2);
+	color: var(--signal-color);
+}
+
+/* Stile codice per route e commenti */
+code {
+	background-color: #000;
+	padding: 2px 6px;
+	border-radius: 4px;
+	font-family: "Courier New", Courier, monospace;
+	font-size: 13px;
+}
+
+.loading {
+	text-align: center;
+	padding: 20px;
+	color: var(--text-secondary);
+}
+
+/* Struttura di overlay che copre l'intera pagina oscurandola leggermente */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(4px);
+	display: none; /* Gestito via JS */
+	justify-content: center;
+	align-items: center;
+	z-index: 9999;
+	font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Finestra centrale del pop-up */
+.modal-content {
+	background: #1e1e24; /* Adattalo al colore scuro del tuo server se preferisci, o #ffffff se chiaro */
+	color: #f5f5f5;
+	width: 90%;
+	max-width: 750px;
+	max-height: 85vh;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+	display: flex;
+	flex-direction: column;
+	animation: fadeInModal 0.3s ease-out;
+	overflow: hidden;
+}
+
+@keyframes fadeInModal {
+	from {
+		transform: translateY(-20px);
+		opacity: 0;
+	}
+	to {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+/* Intestazione del Pop-up */
+.modal-header {
+	padding: 15px 20px;
+	background: #2c2c35;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #3a3a45;
+}
+.modal-header h2 {
+	margin: 0;
+	font-size: 1.3rem;
+}
+.close-modal-btn {
+	font-size: 1.8rem;
+	cursor: pointer;
+	color: #aaa;
+	transition: 0.2s;
+}
+.close-modal-btn:hover {
+	color: #fff;
+}
+
+/* Corpo scorrevole per evitare che esca dallo schermo se ci sono molti log */
+.modal-body {
+	padding: 20px;
+	overflow-y: auto;
+	flex: 1;
+}
+
+/* Banner del Mini Storico e Correlazione globale */
+.risk-banner {
+	background: #25252d;
+	padding: 15px;
+	border-radius: 6px;
+	margin-bottom: 20px;
+}
+.risk-banner h3 {
+	margin-top: 0;
+	font-size: 1.05rem;
+	color: #3498db;
+}
+.risk-banner p {
+	margin: 8px 0;
+	font-size: 0.95rem;
+	line-height: 1.4;
+	color: #dddddd;
+}
+.risk-badge-container {
+	margin-top: 10px;
+	font-weight: bold;
+	font-size: 0.9rem;
+}
+.risk-lvl {
+	padding: 3px 8px;
+	border-radius: 4px;
+	color: #fff;
+	font-size: 0.8rem;
+	margin-left: 5px;
+}
+
+/* Lista dei log analizzati */
+.modal-logs-list {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+}
+.modal-log-item {
+	background: #25252d;
+	border: 1px solid #33333f;
+	padding: 12px 15px;
+	border-radius: 8px;
+}
+.log-item-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 10px;
+	border-bottom: 1px solid #2d2d38;
+	padding-bottom: 5px;
+}
+.modal-log-item p {
+	margin: 5px 0;
+	font-size: 0.9rem;
+	line-height: 1.4;
+}
+.txt-raccomandazione {
+	color: #f39c12;
+}
+
+/* Footer del Pop-up */
+.modal-footer {
+	padding: 12px 20px;
+	background: #2c2c35;
+	display: flex;
+	justify-content: flex-end;
+	border-top: 1px solid #3a3a45;
+}
+.btn-close-footer {
+	background: #34495e;
+	color: white;
+	border: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	cursor: pointer;
+	font-weight: bold;
+	transition: 0.2s;
+}
+.btn-close-footer:hover {
+	background: #415b76;
+}
+.raw-output {
+	background: #000;
+	color: #00ff00;
+	padding: 10px;
+	overflow-x: auto;
+	border-radius: 4px;
+	font-size: 0.85rem;
+}

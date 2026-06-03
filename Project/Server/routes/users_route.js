@@ -2,12 +2,12 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
+const { verifyToken, isCeo } = require("../middleware/auth_middle.js");
 const { addKV, getKeysCopy, getKV } = require("../mapping/mapping.js");
 
 const Logger = require("../utils/logger_utils.js");
 
-router.get("/all-users", verifyToken, isCeoOrAdmin, async (req, res) => {
+router.get("/all-users", verifyToken, isCeo, async (req, res) => {
 	try {
 		const keysAnswer = await getKeysCopy("User");
 		const rawKeys = keysAnswer?.keys || [];
@@ -87,7 +87,7 @@ router.get("/all-users", verifyToken, isCeoOrAdmin, async (req, res) => {
 	}
 });
 
-router.post("/addUser", verifyToken, isCeoOrAdmin, async (req, res) => {
+router.post("/addUser", verifyToken, isCeo, async (req, res) => {
 	try {
 		const { nome, cognome, email, id_wallet, quota, classe, psw } =
 			req.body;

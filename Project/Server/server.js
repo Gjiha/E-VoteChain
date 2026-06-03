@@ -12,6 +12,7 @@ const usersRoutes = require("./routes/users_route.js");
 const roleRoutes = require("./routes/role_route.js");
 const votationRoute = require("./routes/votation_route.js");
 const loggerRoute = require("./routes/logger_route.js");
+const ollamaRoute = require("./routes/ollama_route.js");
 
 const errorHandler = require("./middleware/error_middle.js");
 
@@ -29,7 +30,8 @@ app.use("/api/v1/", fileRoutes);
 app.use("/api/v1/", dbRoutes);
 app.use("/api/v1/", roleRoutes);
 app.use("/api/v1/", votationRoute);
-//app.use("/api/v1/", loggerRoute); // Da commentare e scommentare quando si vogliono vedere i log
+app.use("/api/v1/", loggerRoute);
+app.use("/api/v1/", ollamaRoute);
 
 app.use(errorHandler);
 app.use(protectPages);

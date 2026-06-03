@@ -26,7 +26,7 @@ const verifyToken = async (req, res, next) => {
 	}
 };
 
-const isCeoOrAdmin = async (req, res, next) => {
+const isCeo = async (req, res, next) => {
 	if (!req.user || !req.user.classe) {
 		await Logger.alert(req, 403, "Dati utente o ruolo mancanti nel token.");
 		return res.status(403).json({ message: "Accesso negato." });
@@ -36,6 +36,29 @@ const isCeoOrAdmin = async (req, res, next) => {
 	const isCEO = roleString === "CEO";
 
 	if (isCEO) {
+		next();
+	} else {
+		await Logger.alert(
+			req,
+			403,
+			`Accesso negato. Ruolo insufficiente: ${roleString} (wallet: ${req.user.id_wallet})`,
+		);
+		return res.status(403).json({
+			message: "Accesso negato.",
+		});
+	}
+};
+
+const isAdmin = async (req, res, next) => {
+	if (!req.user || !req.user.classe) {
+		await Logger.alert(req, 403, "Dati utente o ruolo mancanti nel token.");
+		return res.status(403).json({ message: "Accesso negato." });
+	}
+
+	const roleString = String(req.user.classe).toUpperCase().trim();
+	const isADMIN = roleString === "ADMIN";
+
+	if (isADMIN) {
 		next();
 	} else {
 		await Logger.alert(
@@ -87,6 +110,7 @@ const quickTokenCheck = async (req, res, next) => {
 
 module.exports = {
 	verifyToken,
-	isCeoOrAdmin,
+	isCeo,
+	isAdmin,
 	quickTokenCheck,
 };

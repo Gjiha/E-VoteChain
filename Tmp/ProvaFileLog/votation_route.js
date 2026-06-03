@@ -1,7 +1,7 @@
 const express = require("express");
 const crypto = require("crypto");
 const router = express.Router();
-const { verifyToken, isCeoOrAdmin } = require("../middleware/auth_middle.js");
+const { verifyToken, isCeo } = require("../middleware/auth_middle.js");
 const { checkIfAlreadyVoted } = require("../middleware/check_vote_middle.js");
 const { getKV, addKV, getHistoryKV } = require("../mapping/mapping.js");
 
@@ -214,7 +214,7 @@ router.get("/get-votations-status", verifyToken, async (req, res) => {
 	}
 });
 
-router.post("/aggiorna-status", verifyToken, isCeoOrAdmin, async (req, res) => {
+router.post("/aggiorna-status", verifyToken, isCeo, async (req, res) => {
 	try {
 		const { meetingId, votationsStatus } = req.body;
 		if (!meetingId || !votationsStatus) {
@@ -436,7 +436,7 @@ router.post("/add-vote", verifyToken, checkIfAlreadyVoted, async (req, res) => {
 	}
 });
 
-router.post("/validation-vote", verifyToken, isCeoOrAdmin, async (req, res) => {
+router.post("/validation-vote", verifyToken, isCeo, async (req, res) => {
 	try {
 		const { meetingId, voteIndex } = req.body;
 
